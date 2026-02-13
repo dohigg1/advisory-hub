@@ -11,11 +11,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, ClipboardCheck, MoreVertical, Trash2, ArrowUpRight } from "lucide-react";
+import { Plus, ClipboardCheck, MoreVertical, Trash2, ArrowUpRight, LayoutTemplate } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { Assessment, AssessmentType } from "@/types/assessment";
 import { ASSESSMENT_TYPE_LABELS, DEFAULT_SCORE_TIERS } from "@/types/assessment";
 import { motion } from "framer-motion";
+import { TemplateGallery } from "@/components/templates/TemplateGallery";
+import type { TemplateFixture } from "@/data/templates";
 
 const STATUS_STYLES: Record<string, string> = {
   draft: "bg-muted text-muted-foreground border-0",
@@ -36,6 +38,8 @@ const Assessments = () => {
   const [description, setDescription] = useState("");
   const [type, setType] = useState<AssessmentType>("scorecard");
   const [creating, setCreating] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [templateLoading, setTemplateLoading] = useState(false);
 
   const fetchAssessments = useCallback(async () => {
     if (!organisation) return;
@@ -98,6 +102,120 @@ const Assessments = () => {
     navigate(`/assessments/${(data as Assessment).id}`);
   };
 
+  const handleUseTemplate = async (template: TemplateFixture) => {
+    if (!organisation) return;
+    setTemplateLoading(true);
+
+    try {
+      const td = template.template_data_json;
+
+      // 1. Create assessment
+      const { data: assessment, error: aErr } = await supabase
+        .from("assessments")
+        .insert({
+          org_id: organisation.id,
+          title: template.title,
+          description: template.description,
+          type: td.type as AssessmentType,
+          settings_json: td.settings_json,
+        })
+        .select()
+        .single();
+
+      if (aErr || !assessment) throw new Error(aErr?.message || "Failed to create assessment");
+      const assessmentId = (assessment as any).id;
+
+      // 2. Create categories
+      const categoriesToInsert = td.categories.map(c => ({
+        assessment_id: assessmentId,
+        name: c.name,
+        description: c.description,
+        icon: c.icon,
+        colour: c.colour,
+        sort_order: c.sort_order,
+      }));
+
+      const { data: createdCats, error: cErr } = await supabase
+        .from("categories")
+        .insert(categoriesToInsert)
+        .select();
+
+      if (cErr || !createdCats) throw new Error(cErr?.message || "Failed to create categories");
+
+      // Map category_index to actual category id
+      const catIdMap = new Map<number, string>();
+      createdCats.forEach((cat: any, idx: number) => {
+        catIdMap.set(idx, cat.id);
+      });
+
+      // 3. Create questions (excluding open_text which have no options)
+      const questionsToInsert = td.questions.map(q => ({
+        assessment_id: assessmentId,
+        category_id: catIdMap.get(q.category_index)!,
+        type: q.type as any,
+        text: q.text,
+        help_text: q.help_text,
+        is_required: q.is_required,
+        sort_order: q.sort_order,
+      }));
+
+      const { data: createdQs, error: qErr } = await supabase
+        .from("questions")
+        .insert(questionsToInsert)
+        .select();
+
+      if (qErr || !createdQs) throw new Error(qErr?.message || "Failed to create questions");
+
+      // 4. Create answer options for questions that have them
+      const optionsToInsert: any[] = [];
+      td.questions.forEach((q, idx) => {
+        if (q.options && q.options.length > 0) {
+          const questionId = (createdQs as any[])[idx]?.id;
+          if (questionId) {
+            q.options.forEach(opt => {
+              optionsToInsert.push({
+                question_id: questionId,
+                text: opt.text,
+                points: opt.points,
+                sort_order: opt.sort_order,
+              });
+            });
+          }
+        }
+      });
+
+      if (optionsToInsert.length > 0) {
+        const { error: oErr } = await supabase
+          .from("answer_options")
+          .insert(optionsToInsert);
+        if (oErr) throw new Error(oErr.message);
+      }
+
+      // 5. Create score tiers
+      const tiersToInsert = td.score_tiers.map(t => ({
+        assessment_id: assessmentId,
+        label: t.label,
+        min_pct: t.min_pct,
+        max_pct: t.max_pct,
+        colour: t.colour,
+        description: t.description,
+        sort_order: t.sort_order,
+      }));
+
+      const { error: tErr } = await supabase
+        .from("score_tiers")
+        .insert(tiersToInsert);
+      if (tErr) throw new Error(tErr.message);
+
+      toast.success(`"${template.title}" created from template`);
+      navigate(`/assessments/${assessmentId}`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to create from template");
+    } finally {
+      setTemplateLoading(false);
+    }
+  };
+
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("assessments").delete().eq("id", id);
     if (error) toast.error(error.message);
@@ -107,6 +225,18 @@ const Assessments = () => {
     }
   };
 
+  if (showTemplates) {
+    return (
+      <div className="space-y-6">
+        <TemplateGallery
+          onUseTemplate={handleUseTemplate}
+          onBack={() => setShowTemplates(false)}
+          loading={templateLoading}
+        />
+      </div>
+    );
+  }
+
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
       <motion.div variants={item} className="flex items-center justify-between">
@@ -114,40 +244,50 @@ const Assessments = () => {
           <h1 className="text-xl font-bold tracking-tight">Assessments</h1>
           <p className="text-[13px] text-muted-foreground mt-0.5">Create and manage client assessments</p>
         </div>
-        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2 shadow-soft-sm h-9 text-[13px]"><Plus className="h-4 w-4" /> New Assessment</Button>
-          </DialogTrigger>
-          <DialogContent className="shadow-soft-lg">
-            <DialogHeader>
-              <DialogTitle>New Assessment</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleCreate} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label className="text-[12px] font-medium text-muted-foreground">Title</Label>
-                <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Financial Health Check" required />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-[12px] font-medium text-muted-foreground">Description</Label>
-                <Textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Brief description of this assessment" rows={3} />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-[12px] font-medium text-muted-foreground">Type</Label>
-                <Select value={type} onValueChange={v => setType(v as AssessmentType)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(ASSESSMENT_TYPE_LABELS).map(([k, v]) => (
-                      <SelectItem key={k} value={k}>{v}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button type="submit" className="w-full" disabled={creating}>
-                {creating ? "Creating…" : "Create Assessment"}
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <div className="flex gap-2">
+          <Button variant="outline" className="gap-2 shadow-soft-sm h-9 text-[13px]" onClick={() => setShowTemplates(true)}>
+            <LayoutTemplate className="h-4 w-4" /> Templates
+          </Button>
+          <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2 shadow-soft-sm h-9 text-[13px]"><Plus className="h-4 w-4" /> New Assessment</Button>
+            </DialogTrigger>
+            <DialogContent className="shadow-soft-lg">
+              <DialogHeader>
+                <DialogTitle>New Assessment</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleCreate} className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label className="text-[12px] font-medium text-muted-foreground">Title</Label>
+                  <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Financial Health Check" required />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[12px] font-medium text-muted-foreground">Description</Label>
+                  <Textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Brief description of this assessment" rows={3} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[12px] font-medium text-muted-foreground">Type</Label>
+                  <Select value={type} onValueChange={v => setType(v as AssessmentType)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(ASSESSMENT_TYPE_LABELS).map(([k, v]) => (
+                        <SelectItem key={k} value={k}>{v}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" className="flex-1 gap-2" onClick={() => { setCreateOpen(false); setShowTemplates(true); }}>
+                    <LayoutTemplate className="h-4 w-4" /> Use Template
+                  </Button>
+                  <Button type="submit" className="flex-1" disabled={creating}>
+                    {creating ? "Creating…" : "Create Blank"}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </motion.div>
 
       {loading ? (
@@ -163,9 +303,14 @@ const Assessments = () => {
               </div>
               <p className="text-[15px] font-semibold mb-1">No assessments yet</p>
               <p className="text-[13px] text-muted-foreground mb-6 max-w-xs">Create your first assessment to start capturing leads and insights.</p>
-              <Button onClick={() => setCreateOpen(true)} className="gap-2 shadow-soft-sm h-9 text-[13px]">
-                <Plus className="h-4 w-4" /> Create Assessment
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setShowTemplates(true)} className="gap-2 shadow-soft-sm h-9 text-[13px]">
+                  <LayoutTemplate className="h-4 w-4" /> Browse Templates
+                </Button>
+                <Button onClick={() => setCreateOpen(true)} className="gap-2 shadow-soft-sm h-9 text-[13px]">
+                  <Plus className="h-4 w-4" /> Create Blank
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
