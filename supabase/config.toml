@@ -11,3 +11,9 @@ verify_jwt = false
 
 [functions.fire-webhook]
 verify_jwt = false
+
+[functions.portal-auth]
+verify_jwt = false
+
+[functions.portal-notify]
+verify_jwt = false

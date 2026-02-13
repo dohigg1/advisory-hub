@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import PublicLandingPage from "./pages/PublicLandingPage";
 import PublicAssessment from "./pages/PublicAssessment";
 import PublicResults from "./pages/PublicResults";
+import Portal from "./pages/Portal";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/a/:slug" element={<PublicLandingPage />} />
             <Route path="/a/:slug/start" element={<PublicAssessment />} />
             <Route path="/results/:leadId" element={<PublicResults />} />
+            <Route path="/portal/:orgSlug" element={<Portal />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/assessments/:id" element={<ProtectedRoute><AssessmentBuilder /></ProtectedRoute>} />
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>

@@ -1,6 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OrgSettings } from "@/components/settings/OrgSettings";
 import { TeamSettings } from "@/components/settings/TeamSettings";
+import { PortalSettings } from "@/components/settings/PortalSettings";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 
@@ -21,6 +22,7 @@ const Settings = () => {
         <TabsList className="bg-muted/50 p-0.5 h-9">
           <TabsTrigger value="organisation" className="text-[13px] h-8 data-[state=active]:shadow-soft-sm">Organisation</TabsTrigger>
           <TabsTrigger value="team" className="text-[13px] h-8 data-[state=active]:shadow-soft-sm">Team</TabsTrigger>
+          <TabsTrigger value="portal" className="text-[13px] h-8 data-[state=active]:shadow-soft-sm">Client Portal</TabsTrigger>
           <TabsTrigger value="billing" className="text-[13px] h-8 data-[state=active]:shadow-soft-sm">Billing</TabsTrigger>
           <TabsTrigger value="domains" className="text-[13px] h-8 data-[state=active]:shadow-soft-sm">Domains</TabsTrigger>
         </TabsList>
@@ -31,6 +33,10 @@ const Settings = () => {
 
         <TabsContent value="team">
           <TeamSettings />
+        </TabsContent>
+
+        <TabsContent value="portal">
+          <PortalSettings />
         </TabsContent>
 
         <TabsContent value="billing">
