@@ -969,6 +969,45 @@ export type Database = {
           },
         ]
       }
+      templates: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          preview_image_url: string | null
+          question_count: number
+          template_data_json: Json
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          preview_image_url?: string | null
+          question_count?: number
+          template_data_json?: Json
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          preview_image_url?: string | null
+          question_count?: number
+          template_data_json?: Json
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       webhook_logs: {
         Row: {
           assessment_id: string
