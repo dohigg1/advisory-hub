@@ -124,6 +124,10 @@ export function QuestionFlow({ data, leadId, brandColour, onCompleted, setLeadId
   };
 
   if (!currentQuestion) {
+    // No questions in this assessment — skip to completion
+    if (totalQuestions === 0) {
+      onCompleted();
+    }
     return null;
   }
 
