@@ -87,6 +87,7 @@ const PublicLandingPage = () => {
       settings={landingPage.settings_json}
       organisation={organisation}
       assessmentTitle={assessmentTitle}
+      slug={slug}
     />
   );
 };

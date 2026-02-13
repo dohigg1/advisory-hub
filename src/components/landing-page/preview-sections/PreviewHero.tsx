@@ -1,11 +1,19 @@
+import { useNavigate } from "react-router-dom";
 import type { LandingPageSettings } from "@/types/landing-page";
 
 interface Props {
   content: Record<string, any>;
   settings: LandingPageSettings;
+  slug?: string;
 }
 
-export function PreviewHero({ content, settings }: Props) {
+export function PreviewHero({ content, settings, slug }: Props) {
+  const navigate = useNavigate();
+
+  const handleCta = () => {
+    if (slug) navigate(`/a/${slug}/start`);
+  };
+
   return (
     <section
       className="px-6 py-20 md:py-28 text-center"
@@ -27,6 +35,7 @@ export function PreviewHero({ content, settings }: Props) {
         )}
         {content.cta_text && (
           <button
+            onClick={handleCta}
             className="px-8 py-3 text-sm font-semibold rounded-sm shadow-lg transition-transform hover:scale-105"
             style={{
               backgroundColor: settings.button_colour || "#FFFFFF",

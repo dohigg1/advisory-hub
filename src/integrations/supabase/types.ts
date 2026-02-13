@@ -175,6 +175,78 @@ export type Database = {
           },
         ]
       }
+      leads: {
+        Row: {
+          assessment_id: string
+          company: string | null
+          completed_at: string | null
+          created_at: string
+          custom_fields_json: Json | null
+          email: string
+          first_name: string | null
+          id: string
+          ip_address: string | null
+          last_name: string | null
+          org_id: string
+          phone: string | null
+          source: string
+          started_at: string
+          status: string
+          utm_json: Json | null
+        }
+        Insert: {
+          assessment_id: string
+          company?: string | null
+          completed_at?: string | null
+          created_at?: string
+          custom_fields_json?: Json | null
+          email: string
+          first_name?: string | null
+          id?: string
+          ip_address?: string | null
+          last_name?: string | null
+          org_id: string
+          phone?: string | null
+          source?: string
+          started_at?: string
+          status?: string
+          utm_json?: Json | null
+        }
+        Update: {
+          assessment_id?: string
+          company?: string | null
+          completed_at?: string | null
+          created_at?: string
+          custom_fields_json?: Json | null
+          email?: string
+          first_name?: string | null
+          id?: string
+          ip_address?: string | null
+          last_name?: string | null
+          org_id?: string
+          phone?: string | null
+          source?: string
+          started_at?: string
+          status?: string
+          utm_json?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organisations: {
         Row: {
           created_at: string
@@ -290,6 +362,51 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      responses: {
+        Row: {
+          id: string
+          lead_id: string
+          open_text_value: string | null
+          points_awarded: number
+          question_id: string
+          responded_at: string
+          selected_option_ids: string[] | null
+        }
+        Insert: {
+          id?: string
+          lead_id: string
+          open_text_value?: string | null
+          points_awarded?: number
+          question_id: string
+          responded_at?: string
+          selected_option_ids?: string[] | null
+        }
+        Update: {
+          id?: string
+          lead_id?: string
+          open_text_value?: string | null
+          points_awarded?: number
+          question_id?: string
+          responded_at?: string
+          selected_option_ids?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "responses_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "responses_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
             referencedColumns: ["id"]
           },
         ]

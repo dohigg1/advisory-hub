@@ -16,6 +16,7 @@ import Settings from "./pages/Settings";
 import AssessmentBuilder from "./pages/AssessmentBuilder";
 import NotFound from "./pages/NotFound";
 import PublicLandingPage from "./pages/PublicLandingPage";
+import PublicAssessment from "./pages/PublicAssessment";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/a/:slug" element={<PublicLandingPage />} />
+            <Route path="/a/:slug/start" element={<PublicAssessment />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/assessments/:id" element={<ProtectedRoute><AssessmentBuilder /></ProtectedRoute>} />
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
