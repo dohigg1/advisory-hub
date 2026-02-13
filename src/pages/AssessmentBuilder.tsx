@@ -9,10 +9,11 @@ import { CategoriesTab } from "@/components/builder/CategoriesTab";
 import { QuestionsTab } from "@/components/builder/QuestionsTab";
 import { ScoringTab } from "@/components/builder/ScoringTab";
 import { SettingsTab } from "@/components/builder/SettingsTab";
+import { ShareTab } from "@/components/builder/ShareTab";
 import { LandingPageTab } from "@/components/landing-page/LandingPageTab";
 import { ResultsPageTab } from "@/components/results-page/ResultsPageTab";
 
-export type BuilderTab = "categories" | "questions" | "scoring" | "settings" | "landing-page" | "results-page";
+export type BuilderTab = "categories" | "questions" | "scoring" | "settings" | "share" | "landing-page" | "results-page";
 
 const AssessmentBuilder = () => {
   const { id } = useParams<{ id: string }>();
@@ -136,7 +137,7 @@ const AssessmentBuilder = () => {
         <div className="flex-1 overflow-auto">
           <div className="border-b bg-card px-6">
             <nav className="flex gap-6">
-              {(["categories", "questions", "scoring", "settings", "landing-page", "results-page"] as BuilderTab[]).map(tab => (
+              {(["categories", "questions", "scoring", "settings", "share", "landing-page", "results-page"] as BuilderTab[]).map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -197,6 +198,9 @@ const AssessmentBuilder = () => {
                   assessment={assessment}
                   onUpdate={updateAssessment}
                 />
+              )}
+              {activeTab === "share" && (
+                <ShareTab assessment={assessment} />
               )}
             </div>
           )}
