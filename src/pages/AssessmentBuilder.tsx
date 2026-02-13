@@ -9,8 +9,9 @@ import { CategoriesTab } from "@/components/builder/CategoriesTab";
 import { QuestionsTab } from "@/components/builder/QuestionsTab";
 import { ScoringTab } from "@/components/builder/ScoringTab";
 import { SettingsTab } from "@/components/builder/SettingsTab";
+import { LandingPageTab } from "@/components/landing-page/LandingPageTab";
 
-export type BuilderTab = "categories" | "questions" | "scoring" | "settings";
+export type BuilderTab = "categories" | "questions" | "scoring" | "settings" | "landing-page";
 
 const AssessmentBuilder = () => {
   const { id } = useParams<{ id: string }>();
@@ -134,7 +135,7 @@ const AssessmentBuilder = () => {
         <div className="flex-1 overflow-auto">
           <div className="border-b bg-card px-6">
             <nav className="flex gap-6">
-              {(["categories", "questions", "scoring", "settings"] as BuilderTab[]).map(tab => (
+              {(["categories", "questions", "scoring", "settings", "landing-page"] as BuilderTab[]).map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -142,56 +143,60 @@ const AssessmentBuilder = () => {
                     activeTab === tab
                       ? "border-accent text-foreground"
                       : "border-transparent text-muted-foreground hover:text-foreground"
-                  }`}
+                   }`}
                 >
-                  {tab}
+                  {tab === "landing-page" ? "Landing Page" : tab}
                 </button>
               ))}
             </nav>
           </div>
-          <div className="p-6">
-            {activeTab === "categories" && (
-              <CategoriesTab
-                assessment={assessment}
-                categories={categories}
-                selectedId={selectedCategoryId}
-                onSelect={setSelectedCategoryId}
-                onRefresh={refreshCategories}
-              />
-            )}
-            {activeTab === "questions" && (
-              <QuestionsTab
-                assessment={assessment}
-                categories={categories}
-                questions={questions}
-                answerOptions={answerOptions}
-                selectedCategoryId={selectedCategoryId}
-                selectedQuestionId={selectedQuestionId}
-                onSelectQuestion={(qId, catId) => {
-                  setSelectedQuestionId(qId);
-                  setSelectedCategoryId(catId);
-                }}
-                onRefreshQuestions={refreshQuestions}
-                onRefreshOptions={refreshAnswerOptions}
-              />
-            )}
-            {activeTab === "scoring" && (
-              <ScoringTab
-                assessment={assessment}
-                categories={categories}
-                scoreTiers={scoreTiers}
-                onRefresh={refreshScoreTiers}
-                onUpdateAssessment={updateAssessment}
-                onRefreshCategories={refreshCategories}
-              />
-            )}
-            {activeTab === "settings" && (
-              <SettingsTab
-                assessment={assessment}
-                onUpdate={updateAssessment}
-              />
-            )}
-          </div>
+          {activeTab === "landing-page" ? (
+            <LandingPageTab assessment={assessment} />
+          ) : (
+            <div className="p-6">
+              {activeTab === "categories" && (
+                <CategoriesTab
+                  assessment={assessment}
+                  categories={categories}
+                  selectedId={selectedCategoryId}
+                  onSelect={setSelectedCategoryId}
+                  onRefresh={refreshCategories}
+                />
+              )}
+              {activeTab === "questions" && (
+                <QuestionsTab
+                  assessment={assessment}
+                  categories={categories}
+                  questions={questions}
+                  answerOptions={answerOptions}
+                  selectedCategoryId={selectedCategoryId}
+                  selectedQuestionId={selectedQuestionId}
+                  onSelectQuestion={(qId, catId) => {
+                    setSelectedQuestionId(qId);
+                    setSelectedCategoryId(catId);
+                  }}
+                  onRefreshQuestions={refreshQuestions}
+                  onRefreshOptions={refreshAnswerOptions}
+                />
+              )}
+              {activeTab === "scoring" && (
+                <ScoringTab
+                  assessment={assessment}
+                  categories={categories}
+                  scoreTiers={scoreTiers}
+                  onRefresh={refreshScoreTiers}
+                  onUpdateAssessment={updateAssessment}
+                  onRefreshCategories={refreshCategories}
+                />
+              )}
+              {activeTab === "settings" && (
+                <SettingsTab
+                  assessment={assessment}
+                  onUpdate={updateAssessment}
+                />
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -15,6 +15,7 @@ import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import AssessmentBuilder from "./pages/AssessmentBuilder";
 import NotFound from "./pages/NotFound";
+import PublicLandingPage from "./pages/PublicLandingPage";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/a/:slug" element={<PublicLandingPage />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/assessments/:id" element={<ProtectedRoute><AssessmentBuilder /></ProtectedRoute>} />
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>

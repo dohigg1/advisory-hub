@@ -134,6 +134,47 @@ export type Database = {
           },
         ]
       }
+      landing_pages: {
+        Row: {
+          assessment_id: string
+          created_at: string
+          id: string
+          is_published: boolean
+          sections_json: Json
+          settings_json: Json
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          assessment_id: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          sections_json?: Json
+          settings_json?: Json
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          assessment_id?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          sections_json?: Json
+          settings_json?: Json
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "landing_pages_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organisations: {
         Row: {
           created_at: string
