@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Settings, LogOut, User } from "lucide-react";
+import { Settings, LogOut } from "lucide-react";
 
 export function TopBar() {
   const { user, organisation, signOut } = useAuth();
@@ -18,32 +18,27 @@ export function TopBar() {
   const initials = user?.email?.slice(0, 2).toUpperCase() ?? "U";
 
   return (
-    <header className="flex h-14 items-center justify-between border-b bg-card px-4">
+    <header className="flex h-14 items-center justify-between border-b border-border/60 bg-card/70 backdrop-blur-md px-5 sticky top-0 z-20">
       <div className="flex items-center gap-3">
-        <SidebarTrigger />
-        {organisation && (
-          <div className="flex items-center gap-2">
-            {organisation.logo_url && (
-              <img src={organisation.logo_url} alt="" className="h-6 w-6 object-contain" />
-            )}
-            <span className="text-sm font-medium text-foreground">{organisation.name}</span>
-          </div>
-        )}
+        <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
       </div>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="flex items-center gap-2 outline-none">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+          <button className="flex items-center gap-2 outline-none group">
+            <Avatar className="h-8 w-8 transition-shadow group-hover:shadow-soft-md">
+              <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
                 {initials}
               </AvatarFallback>
             </Avatar>
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
-          <div className="px-2 py-1.5">
-            <p className="text-sm font-medium">{user?.email}</p>
+        <DropdownMenuContent align="end" className="w-52">
+          <div className="px-3 py-2">
+            <p className="text-sm font-medium text-foreground">{user?.email}</p>
+            {organisation && (
+              <p className="text-xs text-muted-foreground mt-0.5">{organisation.name}</p>
+            )}
           </div>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => navigate("/settings")}>

@@ -68,17 +68,17 @@ const Auth = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm animate-fade-in">
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center bg-primary">
-            <BarChart3 className="h-5 w-5 text-primary-foreground" />
+        <div className="mb-10 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary shadow-soft-md">
+            <BarChart3 className="h-6 w-6 text-primary-foreground" />
           </div>
-          <h1 className="text-xl font-semibold text-foreground">AdvisoryScore</h1>
+          <h1 className="text-xl font-bold tracking-tight text-foreground">AdvisoryScore</h1>
           <p className="mt-1 text-sm text-muted-foreground">Professional advisory performance platform</p>
         </div>
 
-        <Card className="border shadow-sm">
+        <Card className="shadow-soft-md">
           <CardHeader className="pb-4">
-            <CardTitle className="text-base">
+            <CardTitle className="text-base font-semibold tracking-tight">
               {mode === "login" && "Sign in"}
               {mode === "register" && "Create account"}
               {mode === "forgot" && "Reset password"}
@@ -93,26 +93,26 @@ const Auth = () => {
             <form onSubmit={mode === "login" ? handleLogin : mode === "register" ? handleRegister : handleForgot} className="space-y-4">
               {mode === "register" && (
                 <div className="space-y-1.5">
-                  <Label htmlFor="fullName" className="text-xs font-medium">Full name</Label>
+                  <Label htmlFor="fullName" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Full name</Label>
                   <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Jane Smith" required />
                 </div>
               )}
               <div className="space-y-1.5">
-                <Label htmlFor="email" className="text-xs font-medium">Email</Label>
+                <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Email</Label>
                 <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" required />
               </div>
               {mode !== "forgot" && (
                 <div className="space-y-1.5">
-                  <Label htmlFor="password" className="text-xs font-medium">Password</Label>
+                  <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Password</Label>
                   <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} />
                 </div>
               )}
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full shadow-soft-sm" disabled={loading}>
                 {loading ? "Please wait…" : mode === "login" ? "Sign in" : mode === "register" ? "Create account" : "Send reset link"}
               </Button>
             </form>
 
-            <div className="mt-4 space-y-2 text-center text-sm">
+            <div className="mt-5 space-y-2 text-center text-sm">
               {mode === "login" && (
                 <>
                   <button onClick={() => setMode("forgot")} className="text-muted-foreground hover:text-foreground transition-colors">
@@ -120,7 +120,7 @@ const Auth = () => {
                   </button>
                   <div>
                     <span className="text-muted-foreground">No account? </span>
-                    <button onClick={() => setMode("register")} className="text-accent hover:underline font-medium">
+                    <button onClick={() => setMode("register")} className="text-accent hover:underline font-semibold">
                       Sign up
                     </button>
                   </div>

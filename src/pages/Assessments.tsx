@@ -11,14 +11,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, ClipboardCheck, MoreVertical, Trash2 } from "lucide-react";
+import { Plus, ClipboardCheck, MoreVertical, Trash2, ArrowRight } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { Assessment, AssessmentType } from "@/types/assessment";
 import { ASSESSMENT_TYPE_LABELS, DEFAULT_SCORE_TIERS } from "@/types/assessment";
 
 const STATUS_STYLES: Record<string, string> = {
   draft: "bg-secondary text-secondary-foreground",
-  published: "bg-success text-success-foreground",
+  published: "bg-success/10 text-success border-success/20",
   archived: "bg-muted text-muted-foreground",
 };
 
@@ -81,7 +81,6 @@ const Assessments = () => {
       return;
     }
 
-    // Create default score tiers
     const tiersToInsert = DEFAULT_SCORE_TIERS.map(t => ({
       ...t,
       assessment_id: (data as Assessment).id,
@@ -105,15 +104,15 @@ const Assessments = () => {
   };
 
   return (
-    <div className="animate-fade-in space-y-6">
+    <div className="animate-fade-in space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Assessments</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Assessments</h1>
           <p className="text-sm text-muted-foreground mt-1">Create and manage client assessments</p>
         </div>
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2"><Plus className="h-4 w-4" /> Create Assessment</Button>
+            <Button className="gap-2 shadow-soft-sm"><Plus className="h-4 w-4" /> New Assessment</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -121,21 +120,22 @@ const Assessments = () => {
             </DialogHeader>
             <form onSubmit={handleCreate} className="space-y-4">
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium">Title</Label>
+                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Title</Label>
                 <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Financial Health Check" required />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium">Description</Label>
+                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Description</Label>
                 <Textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Brief description of this assessment" rows={3} />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium">Type</Label>
+                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Type</Label>
                 <Select value={type} onValueChange={v => setType(v as AssessmentType)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {Object.entries(ASSESSMENT_TYPE_LABELS).map(([k, v]) => (
                       <SelectItem key={k} value={k}>{v}</SelectItem>
-                    ))}
+                    ))
+                    }
                   </SelectContent>
                 </Select>
               </div>
@@ -148,34 +148,40 @@ const Assessments = () => {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="h-6 w-6 animate-spin border-2 border-primary border-t-transparent" />
+        <div className="flex justify-center py-16">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         </div>
       ) : assessments.length === 0 ? (
-        <Card className="border shadow-sm">
-          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-            <ClipboardCheck className="h-10 w-10 text-muted-foreground mb-4" />
-            <p className="text-sm font-medium mb-1">No assessments yet</p>
-            <p className="text-sm text-muted-foreground mb-4">Create your first assessment to get started.</p>
-            <Button onClick={() => setCreateOpen(true)} className="gap-2">
+        <Card className="shadow-soft-sm">
+          <CardContent className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-muted mb-5">
+              <ClipboardCheck className="h-7 w-7 text-muted-foreground" />
+            </div>
+            <p className="text-base font-semibold mb-1">No assessments yet</p>
+            <p className="text-sm text-muted-foreground mb-6 max-w-xs">Create your first assessment to start capturing leads and insights.</p>
+            <Button onClick={() => setCreateOpen(true)} className="gap-2 shadow-soft-sm">
               <Plus className="h-4 w-4" /> Create Assessment
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {assessments.map(a => (
-            <Card key={a.id} className="border shadow-sm cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(`/assessments/${a.id}`)}>
-              <CardHeader className="flex flex-row items-start justify-between pb-2">
-                <div className="space-y-1 flex-1 min-w-0">
-                  <CardTitle className="text-sm font-medium truncate">{a.title}</CardTitle>
-                  <p className="text-xs text-muted-foreground">{ASSESSMENT_TYPE_LABELS[a.type]}</p>
+            <Card
+              key={a.id}
+              className="group relative overflow-hidden shadow-soft-sm hover:shadow-soft-md transition-all duration-200 cursor-pointer"
+              onClick={() => navigate(`/assessments/${a.id}`)}
+            >
+              <CardHeader className="flex flex-row items-start justify-between pb-3">
+                <div className="space-y-1.5 flex-1 min-w-0">
+                  <CardTitle className="text-sm font-semibold tracking-tight truncate">{a.title}</CardTitle>
+                  <p className="text-xs text-muted-foreground font-medium">{ASSESSMENT_TYPE_LABELS[a.type]}</p>
                 </div>
-                <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                  <Badge className={STATUS_STYLES[a.status]}>{a.status}</Badge>
+                <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
+                  <Badge className={`text-[10px] font-semibold ${STATUS_STYLES[a.status]}`}>{a.status}</Badge>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity">
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -188,13 +194,17 @@ const Assessments = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-xs text-muted-foreground line-clamp-2">{a.description || "No description"}</p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Updated {new Date(a.updated_at).toLocaleDateString()}
-                </p>
+                <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{a.description || "No description"}</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] text-muted-foreground/60">
+                    Updated {new Date(a.updated_at).toLocaleDateString()}
+                  </p>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-accent transition-colors" />
+                </div>
               </CardContent>
             </Card>
-          ))}
+          ))
+          }
         </div>
       )}
     </div>
