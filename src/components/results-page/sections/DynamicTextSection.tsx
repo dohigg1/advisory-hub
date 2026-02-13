@@ -20,9 +20,11 @@ export function DynamicTextSection({ section, data }: Props) {
   if (!content && !c.heading) return null;
 
   return (
-    <section className="bg-white rounded-xl shadow-sm border p-8">
-      {c.heading && <h2 className="text-xl font-semibold text-slate-900 mb-4">{c.heading}</h2>}
-      {content && <p className="text-slate-600 leading-relaxed whitespace-pre-wrap">{content}</p>}
+    <section className="rounded-sm border border-border bg-card shadow-sm">
+      <div className="p-8">
+        {c.heading && <h2 className="text-lg font-semibold text-foreground tracking-tight mb-4">{c.heading}</h2>}
+        {content && <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">{content}</p>}
+      </div>
     </section>
   );
 }

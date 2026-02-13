@@ -101,11 +101,12 @@ export function ResultsPagePreview({ sections, scoreTiers, categories, assessmen
   }
 
   return (
-    <div className="bg-slate-50 min-h-full">
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-        <div className="text-center mb-4">
-          <h1 className="text-2xl font-bold text-slate-900 mb-1">Your Assessment Results</h1>
-          <p className="text-slate-400 text-xs">Preview — showing sample data</p>
+    <div className="min-h-full" style={{ background: "linear-gradient(180deg, hsl(210 20% 97%) 0%, hsl(210 15% 94%) 100%)" }}>
+      <div className="max-w-3xl mx-auto px-6 py-10 space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Your Assessment Results</h1>
+          <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest">Preview · Sample Data</p>
         </div>
 
         {visibleSections.map(section => {
@@ -126,3 +127,4 @@ export function ResultsPagePreview({ sections, scoreTiers, categories, assessmen
     </div>
   );
 }
+

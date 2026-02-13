@@ -26,20 +26,28 @@ export function CtaSection({ section, data }: Props) {
   if (!heading && !buttonText) return null;
 
   return (
-    <section className="rounded-xl p-8 text-center" style={{ backgroundColor: data.brandColour + "0A" }}>
-      {heading && <h2 className="text-xl font-semibold text-slate-900 mb-3">{heading}</h2>}
-      {description && <p className="text-slate-600 text-sm mb-6 max-w-lg mx-auto">{description}</p>}
-      {buttonText && (
-        <a
-          href={buttonUrl || "#"}
-          target={buttonUrl ? "_blank" : undefined}
-          rel="noopener noreferrer"
-          className="inline-block px-8 py-3 rounded-md text-white text-sm font-medium transition-opacity hover:opacity-90"
-          style={{ backgroundColor: data.brandColour }}
-        >
-          {buttonText}
-        </a>
-      )}
+    <section
+      className="relative overflow-hidden rounded-sm border text-center"
+      style={{
+        borderColor: data.brandColour + "30",
+        background: `linear-gradient(135deg, ${data.brandColour}08 0%, ${data.brandColour}14 100%)`,
+      }}
+    >
+      <div className="p-10">
+        {heading && <h2 className="text-xl font-bold text-foreground tracking-tight mb-3">{heading}</h2>}
+        {description && <p className="text-muted-foreground text-sm mb-8 max-w-lg mx-auto leading-relaxed">{description}</p>}
+        {buttonText && (
+          <a
+            href={buttonUrl || "#"}
+            target={buttonUrl ? "_blank" : undefined}
+            rel="noopener noreferrer"
+            className="inline-block px-8 py-3 rounded-sm text-white text-sm font-semibold tracking-wide transition-all hover:opacity-90 hover:shadow-lg"
+            style={{ backgroundColor: data.brandColour }}
+          >
+            {buttonText}
+          </a>
+        )}
+      </div>
     </section>
   );
 }
