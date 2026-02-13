@@ -2,21 +2,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OrgSettings } from "@/components/settings/OrgSettings";
 import { TeamSettings } from "@/components/settings/TeamSettings";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion } from "framer-motion";
 
 const Settings = () => {
   return (
-    <div className="animate-fade-in space-y-8">
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-6"
+    >
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-        <p className="text-sm text-muted-foreground mt-1">Manage your organisation and team</p>
+        <h1 className="text-xl font-bold tracking-tight">Settings</h1>
+        <p className="text-[13px] text-muted-foreground mt-0.5">Manage your organisation and team</p>
       </div>
 
-      <Tabs defaultValue="organisation" className="space-y-6">
-        <TabsList className="bg-muted/60">
-          <TabsTrigger value="organisation">Organisation</TabsTrigger>
-          <TabsTrigger value="team">Team</TabsTrigger>
-          <TabsTrigger value="billing">Billing</TabsTrigger>
-          <TabsTrigger value="domains">Domains</TabsTrigger>
+      <Tabs defaultValue="organisation" className="space-y-5">
+        <TabsList className="bg-muted/50 p-0.5 h-9">
+          <TabsTrigger value="organisation" className="text-[13px] h-8 data-[state=active]:shadow-soft-sm">Organisation</TabsTrigger>
+          <TabsTrigger value="team" className="text-[13px] h-8 data-[state=active]:shadow-soft-sm">Team</TabsTrigger>
+          <TabsTrigger value="billing" className="text-[13px] h-8 data-[state=active]:shadow-soft-sm">Billing</TabsTrigger>
+          <TabsTrigger value="domains" className="text-[13px] h-8 data-[state=active]:shadow-soft-sm">Domains</TabsTrigger>
         </TabsList>
 
         <TabsContent value="organisation">
@@ -28,28 +34,28 @@ const Settings = () => {
         </TabsContent>
 
         <TabsContent value="billing">
-          <Card className="shadow-soft-sm">
+          <Card className="shadow-soft-sm border-border/60">
             <CardHeader>
-              <CardTitle className="text-sm font-semibold tracking-tight">Billing</CardTitle>
+              <CardTitle className="text-[13px] font-semibold tracking-tight">Billing</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">Billing management coming soon.</p>
+              <p className="text-[13px] text-muted-foreground">Billing management coming soon.</p>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="domains">
-          <Card className="shadow-soft-sm">
+          <Card className="shadow-soft-sm border-border/60">
             <CardHeader>
-              <CardTitle className="text-sm font-semibold tracking-tight">Custom Domains</CardTitle>
+              <CardTitle className="text-[13px] font-semibold tracking-tight">Custom Domains</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">Custom domain configuration coming soon.</p>
+              <p className="text-[13px] text-muted-foreground">Custom domain configuration coming soon.</p>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </motion.div>
   );
 };
 
