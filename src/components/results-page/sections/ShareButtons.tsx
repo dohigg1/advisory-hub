@@ -1,5 +1,6 @@
 import type { ResultsData } from "@/pages/PublicResults";
-import { Linkedin, Twitter, Mail, Download } from "lucide-react";
+import { Linkedin, Twitter, Mail } from "lucide-react";
+import { DownloadReportButton } from "@/components/pdf-report/DownloadReportButton";
 
 interface Props {
   data: ResultsData;
@@ -17,7 +18,7 @@ export function ShareButtons({ data }: Props) {
   return (
     <div className="bg-white rounded-xl shadow-sm border p-8 text-center">
       <h3 className="text-lg font-semibold text-slate-900 mb-4">Share Your Results</h3>
-      <div className="flex items-center justify-center gap-3">
+      <div className="flex items-center justify-center gap-3 flex-wrap">
         <a
           href={linkedinUrl}
           target="_blank"
@@ -40,13 +41,7 @@ export function ShareButtons({ data }: Props) {
         >
           <Mail className="h-4 w-4" /> Email
         </a>
-        <button
-          disabled
-          className="flex items-center gap-2 px-4 py-2.5 rounded-md border text-sm font-medium text-slate-400 cursor-not-allowed"
-          title="Coming soon"
-        >
-          <Download className="h-4 w-4" /> Download PDF
-        </button>
+        <DownloadReportButton data={data} />
       </div>
     </div>
   );
