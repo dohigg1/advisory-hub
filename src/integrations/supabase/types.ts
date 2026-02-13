@@ -348,6 +348,10 @@ export type Database = {
     }
     Functions: {
       assessment_org_id: { Args: { _assessment_id: string }; Returns: string }
+      create_organisation_for_user: {
+        Args: { _name: string; _primary_colour?: string }
+        Returns: string
+      }
       get_user_org_id: { Args: never; Returns: string }
       get_user_role: {
         Args: never

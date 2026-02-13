@@ -37,36 +37,28 @@ const Onboarding = () => {
     setLoading(true);
 
     try {
-      // Create organisation
-      const { data: org, error: orgError } = await supabase
-        .from("organisations")
-        .insert({ name: orgName, primary_colour: primaryColour })
-        .select()
-        .single();
+      // Create organisation via RPC (bypasses RLS safely)
+      const { data: orgId, error: orgError } = await supabase
+        .rpc("create_organisation_for_user", {
+          _name: orgName,
+          _primary_colour: primaryColour,
+        });
 
       if (orgError) throw orgError;
 
       // Upload logo if provided
-      let logoUrl: string | null = null;
-      if (logoFile && org) {
+      if (logoFile && orgId) {
         const ext = logoFile.name.split(".").pop();
-        const path = `${org.id}/logo.${ext}`;
+        const path = `${orgId}/logo.${ext}`;
         const { error: uploadError } = await supabase.storage
           .from("org-logos")
           .upload(path, logoFile, { upsert: true });
 
         if (!uploadError) {
           const { data: urlData } = supabase.storage.from("org-logos").getPublicUrl(path);
-          logoUrl = urlData.publicUrl;
-          await supabase.from("organisations").update({ logo_url: logoUrl }).eq("id", org.id);
+          await supabase.from("organisations").update({ logo_url: urlData.publicUrl }).eq("id", orgId);
         }
       }
-
-      // Link profile to organisation with admin role
-      await supabase
-        .from("profiles")
-        .update({ org_id: org.id, role: "admin" })
-        .eq("auth_user_id", user.id);
 
       await refreshProfile();
       toast.success("Organisation created!");
