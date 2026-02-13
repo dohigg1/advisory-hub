@@ -113,35 +113,41 @@ export default function PublicAssessment() {
     }
   };
 
+  const calculateAndRedirect = useCallback(async (id: string) => {
+    setStep("calculating");
+    try {
+      const { data: fnData, error } = await supabase.functions.invoke("calculate-score", {
+        body: { lead_id: id },
+      });
+      if (error) console.error("Scoring error:", error);
+    } catch (e) {
+      console.error("Scoring invocation error:", e);
+    }
+    navigate(`/results/${id}`);
+  }, [navigate]);
+
   const handleLeadSubmitted = useCallback((newLeadId: string) => {
     setLeadId(newLeadId);
     const position = data?.settings.lead_form_position || "before";
     if (position === "before") {
       setStep("questions");
     } else {
-      // After questions, lead form was shown, now calculate & redirect
-      setStep("calculating");
-      supabase.from("leads").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", newLeadId).then();
-      setTimeout(() => navigate(`/results/${newLeadId}`), 2000);
+      calculateAndRedirect(newLeadId);
     }
-  }, [data, navigate]);
+  }, [data, calculateAndRedirect]);
 
   const handleQuestionsCompleted = useCallback(() => {
     const position = data?.settings.lead_form_position || "before";
     if (position === "after") {
       setStep("lead_form");
     } else {
-      setStep("calculating");
-      setTimeout(() => {
-        if (leadId) {
-          supabase.from("leads").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", leadId).then();
-          navigate(`/results/${leadId}`);
-        } else {
-          setStep("completed");
-        }
-      }, 2000);
+      if (leadId) {
+        calculateAndRedirect(leadId);
+      } else {
+        setStep("completed");
+      }
     }
-  }, [data, leadId, navigate]);
+  }, [data, leadId, calculateAndRedirect]);
 
   const handleAlreadyCompleted = useCallback(() => {
     setStep("already_completed");
