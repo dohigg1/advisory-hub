@@ -185,13 +185,13 @@ export default function PublicResults() {
   const visibleSections = data.sections.filter(s => s.is_visible);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ background: "linear-gradient(180deg, hsl(210 20% 97%) 0%, hsl(210 15% 94%) 100%)" }}>
       <AssessmentHeader organisation={data.organisation} brandColour={data.brandColour} />
-      <main className="max-w-4xl mx-auto px-4 py-10 space-y-10">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Your Assessment Results</h1>
-          <p className="text-slate-500 text-sm">
-            {data.assessment.title} • Completed {data.lead.completed_at ? new Date(data.lead.completed_at).toLocaleDateString() : ""}
+      <main className="max-w-3xl mx-auto px-6 py-10 space-y-8">
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Your Assessment Results</h1>
+          <p className="text-muted-foreground text-sm">
+            {data.assessment.title} · Completed {data.lead.completed_at ? new Date(data.lead.completed_at).toLocaleDateString() : ""}
           </p>
         </div>
 
