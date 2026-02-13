@@ -189,6 +189,7 @@ export type Database = {
           last_name: string | null
           org_id: string
           phone: string | null
+          score_id: string | null
           source: string
           started_at: string
           status: string
@@ -207,6 +208,7 @@ export type Database = {
           last_name?: string | null
           org_id: string
           phone?: string | null
+          score_id?: string | null
           source?: string
           started_at?: string
           status?: string
@@ -225,6 +227,7 @@ export type Database = {
           last_name?: string | null
           org_id?: string
           phone?: string | null
+          score_id?: string | null
           source?: string
           started_at?: string
           status?: string
@@ -243,6 +246,13 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_score_id_fkey"
+            columns: ["score_id"]
+            isOneToOne: false
+            referencedRelation: "scores"
             referencedColumns: ["id"]
           },
         ]
@@ -480,6 +490,96 @@ export type Database = {
             columns: ["assessment_id"]
             isOneToOne: false
             referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scores: {
+        Row: {
+          assessment_id: string
+          calculated_at: string
+          category_scores_json: Json
+          id: string
+          lead_id: string
+          percentage: number | null
+          tier_id: string | null
+          total_points: number
+          total_possible: number
+        }
+        Insert: {
+          assessment_id: string
+          calculated_at?: string
+          category_scores_json?: Json
+          id?: string
+          lead_id: string
+          percentage?: number | null
+          tier_id?: string | null
+          total_points?: number
+          total_possible?: number
+        }
+        Update: {
+          assessment_id?: string
+          calculated_at?: string
+          category_scores_json?: Json
+          id?: string
+          lead_id?: string
+          percentage?: number | null
+          tier_id?: string | null
+          total_points?: number
+          total_possible?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scores_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scores_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scores_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "score_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scoring_errors: {
+        Row: {
+          created_at: string
+          error_details: Json | null
+          error_message: string
+          id: string
+          lead_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_details?: Json | null
+          error_message: string
+          id?: string
+          lead_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_details?: Json | null
+          error_message?: string
+          id?: string
+          lead_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scoring_errors_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
             referencedColumns: ["id"]
           },
         ]
