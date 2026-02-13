@@ -275,6 +275,29 @@ Deno.serve(async (req) => {
       })
       .eq("id", lead_id);
 
+    // Fire automations in background (don't block response)
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const automationHeaders = {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${serviceKey}`,
+    };
+    const automationBody = JSON.stringify({ lead_id });
+
+    // Fire and forget - results email
+    fetch(`${supabaseUrl}/functions/v1/send-results-email`, {
+      method: "POST",
+      headers: automationHeaders,
+      body: automationBody,
+    }).catch(e => console.error("Results email trigger failed:", e));
+
+    // Fire and forget - webhook
+    fetch(`${supabaseUrl}/functions/v1/fire-webhook`, {
+      method: "POST",
+      headers: automationHeaders,
+      body: automationBody,
+    }).catch(e => console.error("Webhook trigger failed:", e));
+
     return new Response(
       JSON.stringify({
         score: scoreRecord,
