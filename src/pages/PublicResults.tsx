@@ -25,6 +25,12 @@ export interface CategoryScore {
   tier: ScoreTier | null;
 }
 
+export interface BenchmarkData {
+  overall: { avg_score: number; median_score: number; percentile_25: number; percentile_75: number; sample_size: number } | null;
+  categories: Record<string, { avg_score: number; median_score: number; percentile_25: number; percentile_75: number; sample_size: number }>;
+  percentileRank: number | null; // "You scored higher than X%"
+}
+
 export interface ResultsData {
   lead: Tables<"leads">;
   organisation: Tables<"organisations"> | null;
@@ -36,6 +42,7 @@ export interface ResultsData {
   overallTier: ScoreTier | null;
   sections: ResultsPageSection[];
   brandColour: string;
+  benchmarks: BenchmarkData | null;
 }
 
 export default function PublicResults() {
@@ -100,6 +107,46 @@ export default function PublicResults() {
 
     const brandColour = orgRes.data?.primary_colour || "#1B3A5C";
 
+    // Fetch benchmarks
+    let benchmarks: BenchmarkData | null = null;
+    const assessmentSettings = (assessment.settings_json as any) || {};
+    const minSample = assessmentSettings.benchmark_min_sample ?? 10;
+
+    if (assessmentSettings.benchmarking_enabled !== false) {
+      const { data: benchmarkRows } = await supabase
+        .from("benchmarks" as any)
+        .select("*")
+        .eq("assessment_id", lead.assessment_id);
+
+      if (benchmarkRows && benchmarkRows.length > 0) {
+        const overallBm = (benchmarkRows as any[]).find((b: any) => !b.category_id);
+        const catBms: Record<string, any> = {};
+        (benchmarkRows as any[]).forEach((b: any) => {
+          if (b.category_id && b.sample_size >= minSample) {
+            catBms[b.category_id] = { avg_score: Number(b.avg_score), median_score: Number(b.median_score), percentile_25: Number(b.percentile_25), percentile_75: Number(b.percentile_75), sample_size: b.sample_size };
+          }
+        });
+
+        // Calculate percentile rank
+        let percentileRank: number | null = null;
+        if (overallBm && overallBm.sample_size >= minSample && score?.percentage != null) {
+          // Approximate percentile from quartiles
+          const pct = Number(score.percentage);
+          if (pct <= Number(overallBm.percentile_25)) percentileRank = Math.round((pct / Number(overallBm.percentile_25)) * 25);
+          else if (pct <= Number(overallBm.median_score)) percentileRank = Math.round(25 + ((pct - Number(overallBm.percentile_25)) / (Number(overallBm.median_score) - Number(overallBm.percentile_25))) * 25);
+          else if (pct <= Number(overallBm.percentile_75)) percentileRank = Math.round(50 + ((pct - Number(overallBm.median_score)) / (Number(overallBm.percentile_75) - Number(overallBm.median_score))) * 25);
+          else percentileRank = Math.round(75 + ((pct - Number(overallBm.percentile_75)) / (100 - Number(overallBm.percentile_75))) * 25);
+          percentileRank = Math.min(99, Math.max(1, percentileRank));
+        }
+
+        benchmarks = {
+          overall: overallBm && overallBm.sample_size >= minSample ? { avg_score: Number(overallBm.avg_score), median_score: Number(overallBm.median_score), percentile_25: Number(overallBm.percentile_25), percentile_75: Number(overallBm.percentile_75), sample_size: overallBm.sample_size } : null,
+          categories: catBms,
+          percentileRank,
+        };
+      }
+    }
+
     setData({
       lead,
       organisation: orgRes.data,
@@ -111,6 +158,7 @@ export default function PublicResults() {
       overallTier,
       sections,
       brandColour,
+      benchmarks,
     });
     setLoading(false);
   };

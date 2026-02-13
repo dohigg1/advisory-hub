@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
     const assessmentId = lead.assessment_id;
 
     // Fetch all needed data in parallel
-    const [responsesRes, questionsRes, categoriesRes, tiersRes] =
+    const [responsesRes, questionsRes, categoriesRes, tiersRes, assessmentRes] =
       await Promise.all([
         supabase.from("responses").select("*").eq("lead_id", lead_id),
         supabase
@@ -56,6 +56,11 @@ Deno.serve(async (req) => {
           .select("*")
           .eq("assessment_id", assessmentId)
           .order("min_pct"),
+        supabase
+          .from("assessments")
+          .select("settings_json")
+          .eq("id", assessmentId)
+          .single(),
       ]);
 
     const responses = responsesRes.data || [];
@@ -297,6 +302,14 @@ Deno.serve(async (req) => {
       headers: automationHeaders,
       body: automationBody,
     }).catch(e => console.error("Webhook trigger failed:", e));
+
+    // Recalculate benchmarks if enabled
+    const assessmentSettings = (assessmentRes?.data?.settings_json as any) || {};
+    if (assessmentSettings.benchmarking_enabled !== false) {
+      supabase.rpc("recalculate_benchmarks", { _assessment_id: assessmentId })
+        .then(() => console.log("Benchmarks recalculated"))
+        .catch(e => console.error("Benchmark recalc failed:", e));
+    }
 
     return new Response(
       JSON.stringify({

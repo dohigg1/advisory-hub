@@ -13,12 +13,16 @@ const styles = StyleSheet.create({
   barLabel: { fontSize: 8, color: "#94A3B8", marginBottom: 4 },
   barBg: { height: 12, borderRadius: 6, backgroundColor: "#F1F5F9", width: "100%", position: "relative" },
   barFill: { height: 12, borderRadius: 6, position: "absolute", top: 0, left: 0 },
+  benchmarkLine: { position: "absolute", top: -2, width: 2, height: 16, backgroundColor: "#64748B" },
+  benchmarkRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 6 },
+  benchmarkText: { fontSize: 8, color: "#94A3B8" },
 });
 
 interface Props { cs: CategoryScore; data: ResultsData }
 
 export function CategoryPage({ cs, data }: Props) {
   const tierColour = cs.tier?.colour || data.brandColour;
+  const benchmark = data.benchmarks?.categories?.[cs.category.id];
 
   return (
     <Page size="A4" style={styles.page}>
@@ -53,7 +57,16 @@ export function CategoryPage({ cs, data }: Props) {
         <Text style={styles.barLabel}>Score position: {cs.percentage}%</Text>
         <View style={styles.barBg}>
           <View style={[styles.barFill, { width: `${cs.percentage}%`, backgroundColor: tierColour }]} />
+          {benchmark && (
+            <View style={[styles.benchmarkLine, { left: `${benchmark.avg_score}%` }]} />
+          )}
         </View>
+        {benchmark && (
+          <View style={styles.benchmarkRow}>
+            <Text style={styles.benchmarkText}>Your score: {cs.percentage}%</Text>
+            <Text style={styles.benchmarkText}>Industry avg: {benchmark.avg_score}%</Text>
+          </View>
+        )}
       </View>
     </Page>
   );

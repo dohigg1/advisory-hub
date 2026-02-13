@@ -239,6 +239,41 @@ export function SettingsTab({ assessment, onUpdate }: Props) {
         </CardContent>
       </Card>
 
+      {/* Benchmarking */}
+      <Card className="border shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Benchmarking</CardTitle>
+          <p className="text-xs text-muted-foreground">Show industry benchmarks on results pages</p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm">Enable benchmarking</p>
+              <p className="text-xs text-muted-foreground">Aggregate anonymised scores to show industry comparisons</p>
+            </div>
+            <Switch
+              checked={settings.benchmarking_enabled ?? true}
+              onCheckedChange={v => updateSettings({ benchmarking_enabled: v })}
+            />
+          </div>
+          {(settings.benchmarking_enabled ?? true) && (
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Minimum sample size</Label>
+              <Input
+                type="number"
+                min={1}
+                value={settings.benchmark_min_sample ?? 10}
+                onChange={e => updateSettings({ benchmark_min_sample: parseInt(e.target.value) || 10 })}
+                className="w-24"
+              />
+              <p className="text-xs text-muted-foreground">Benchmarks won't display until this many completions are reached</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Separator />
+
       {/* Behaviour */}
       <Card className="border shadow-sm">
         <CardHeader>

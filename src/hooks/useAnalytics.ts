@@ -260,6 +260,42 @@ export function useResponsePatterns(assessmentId: string | null) {
   });
 }
 
+// Benchmark statistics for analytics
+export function useBenchmarkStats(assessmentId: string | null) {
+  return useQuery({
+    queryKey: ["benchmark-stats", assessmentId],
+    enabled: !!assessmentId,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("benchmarks" as any)
+        .select("*")
+        .eq("assessment_id", assessmentId!);
+      if (error) throw error;
+      const rows = (data as any[]) ?? [];
+      const overall = rows.find((r: any) => !r.category_id);
+      const categories = rows.filter((r: any) => r.category_id).map((r: any) => ({
+        category_id: r.category_id,
+        avg_score: Number(r.avg_score),
+        median_score: Number(r.median_score),
+        percentile_25: Number(r.percentile_25),
+        percentile_75: Number(r.percentile_75),
+        sample_size: r.sample_size,
+      }));
+      return {
+        overall: overall ? {
+          avg_score: Number(overall.avg_score),
+          median_score: Number(overall.median_score),
+          percentile_25: Number(overall.percentile_25),
+          percentile_75: Number(overall.percentile_75),
+          sample_size: overall.sample_size,
+        } : null,
+        categories,
+      };
+    },
+  });
+}
+
 // Org assessments list for filter
 export function useOrgAssessments() {
   const { profile } = useAuth();

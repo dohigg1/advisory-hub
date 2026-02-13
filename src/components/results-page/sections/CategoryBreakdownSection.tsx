@@ -1,4 +1,4 @@
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, LabelList } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, LabelList, ReferenceLine } from "recharts";
 import type { ResultsData } from "@/pages/PublicResults";
 import type { ResultsPageSection } from "@/types/results-page";
 
@@ -9,10 +9,13 @@ interface Props {
 
 export function CategoryBreakdownSection({ section, data }: Props) {
   const c = section.content_json;
+  const benchmarks = data.benchmarks?.categories || {};
+
   const chartData = data.categoryScores.map(cs => ({
     name: cs.category.name,
     score: cs.percentage,
     fill: cs.tier?.colour || data.brandColour,
+    benchmark: benchmarks[cs.category.id]?.avg_score ?? null,
   }));
 
   return (
@@ -33,6 +36,18 @@ export function CategoryBreakdownSection({ section, data }: Props) {
           </BarChart>
         </ResponsiveContainer>
       </div>
+
+      {/* Benchmark legend */}
+      {Object.keys(benchmarks).length > 0 && (
+        <div className="mt-4 space-y-2">
+          {chartData.filter(d => d.benchmark !== null).map((d, i) => (
+            <div key={i} className="flex items-center justify-between text-xs text-slate-500">
+              <span>{d.name}</span>
+              <span>Your score: <strong className="text-slate-700">{d.score}%</strong> · Industry avg: <strong className="text-slate-700">{d.benchmark}%</strong></span>
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

@@ -12,6 +12,7 @@ const styles = StyleSheet.create({
   tableRow: { flexDirection: "row", paddingVertical: 5, borderBottomWidth: 0.5, borderBottomColor: "#F1F5F9" },
   colName: { flex: 3, fontSize: 10, color: "#334155" },
   colScore: { flex: 1, fontSize: 10, color: "#334155", textAlign: "center" },
+  colBenchmark: { flex: 1, fontSize: 10, color: "#94A3B8", textAlign: "center" },
   colTier: { flex: 1.5, fontSize: 10, textAlign: "center" },
   headerText: { fontSize: 8, color: "#94A3B8", textTransform: "uppercase", fontWeight: 600 },
   dot: { width: 8, height: 8, borderRadius: 4, marginRight: 4 },
@@ -40,22 +41,31 @@ export function CategoryOverview({ data }: Props) {
         <View style={styles.tableHeader}>
           <Text style={[styles.colName, styles.headerText]}>Category</Text>
           <Text style={[styles.colScore, styles.headerText]}>Score</Text>
+          {data.benchmarks?.categories && Object.keys(data.benchmarks.categories).length > 0 && (
+            <Text style={[styles.colBenchmark, styles.headerText]}>Avg</Text>
+          )}
           <Text style={[styles.colTier, styles.headerText]}>Tier</Text>
         </View>
-        {data.categoryScores.map(cs => (
-          <View key={cs.category.id} style={styles.tableRow}>
-            <Text style={styles.colName}>{cs.category.name}</Text>
-            <Text style={styles.colScore}>{cs.percentage}%</Text>
-            <View style={[styles.colTier, styles.tierRow]}>
-              {cs.tier && (
-                <View style={[styles.dot, { backgroundColor: cs.tier.colour }]} />
+        {data.categoryScores.map(cs => {
+          const bm = data.benchmarks?.categories?.[cs.category.id];
+          return (
+            <View key={cs.category.id} style={styles.tableRow}>
+              <Text style={styles.colName}>{cs.category.name}</Text>
+              <Text style={styles.colScore}>{cs.percentage}%</Text>
+              {data.benchmarks?.categories && Object.keys(data.benchmarks.categories).length > 0 && (
+                <Text style={styles.colBenchmark}>{bm ? `${bm.avg_score}%` : "—"}</Text>
               )}
-              <Text style={{ fontSize: 10, color: cs.tier?.colour || "#64748B" }}>
-                {cs.tier?.label || "—"}
-              </Text>
+              <View style={[styles.colTier, styles.tierRow]}>
+                {cs.tier && (
+                  <View style={[styles.dot, { backgroundColor: cs.tier.colour }]} />
+                )}
+                <Text style={{ fontSize: 10, color: cs.tier?.colour || "#64748B" }}>
+                  {cs.tier?.label || "—"}
+                </Text>
+              </View>
             </View>
-          </View>
-        ))}
+          );
+        })}
       </View>
     </Page>
   );

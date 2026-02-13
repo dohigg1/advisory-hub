@@ -46,6 +46,18 @@ export function OverallScoreSection({ section, data }: Props) {
       {c.show_tier_description && overallTier?.description && (
         <p className="mt-4 text-slate-600 text-sm max-w-md mx-auto">{overallTier.description}</p>
       )}
+
+      {data.benchmarks?.percentileRank != null && (
+        <p className="mt-3 text-sm text-slate-500">
+          You scored higher than <strong className="text-slate-800">{data.benchmarks.percentileRank}%</strong> of respondents
+        </p>
+      )}
+
+      {data.benchmarks?.overall && (
+        <p className="mt-1 text-xs text-slate-400">
+          Industry average: {data.benchmarks.overall.avg_score}% · Based on {data.benchmarks.overall.sample_size} responses
+        </p>
+      )}
     </section>
   );
 }

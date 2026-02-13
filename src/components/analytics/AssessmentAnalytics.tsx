@@ -9,6 +9,7 @@ import {
   useCompletionsTimeline,
   useDropoffAnalysis,
   useResponsePatterns,
+  useBenchmarkStats,
   exportLeadsCSV,
   exportResponsesCSV,
 } from "@/hooks/useAnalytics";
@@ -37,6 +38,7 @@ export function AssessmentAnalytics({ assessmentId, assessmentTitle }: Props) {
   const { data: timeline } = useCompletionsTimeline(assessmentId);
   const { data: dropoff } = useDropoffAnalysis(assessmentId);
   const { data: patterns } = useResponsePatterns(assessmentId);
+  const { data: benchmarks } = useBenchmarkStats(assessmentId);
 
   const handleExportLeads = async () => {
     try {
@@ -221,6 +223,50 @@ export function AssessmentAnalytics({ assessmentId, assessmentTitle }: Props) {
           )}
         </CardContent>
       </Card>
+
+      {/* Benchmark Statistics */}
+      {benchmarks?.overall && (
+        <Card className="border shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">Benchmark Statistics</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-4 mb-4">
+              <div className="text-center">
+                <p className="text-2xl font-semibold">{benchmarks.overall.avg_score}%</p>
+                <p className="text-xs text-muted-foreground">Average Score</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-semibold">{benchmarks.overall.median_score}%</p>
+                <p className="text-xs text-muted-foreground">Median Score</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-semibold">{benchmarks.overall.percentile_25}%</p>
+                <p className="text-xs text-muted-foreground">25th Percentile</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-semibold">{benchmarks.overall.percentile_75}%</p>
+                <p className="text-xs text-muted-foreground">75th Percentile</p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground text-center">Based on {benchmarks.overall.sample_size} completed assessments</p>
+
+            {benchmarks.categories.length > 0 && (
+              <div className="mt-6 space-y-2">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Per-Category Benchmarks</p>
+                {benchmarks.categories.map((bc) => (
+                  <div key={bc.category_id} className="flex items-center justify-between py-1.5 border-b last:border-0">
+                    <span className="text-sm">{bc.category_id.substring(0, 8)}...</span>
+                    <span className="text-xs text-muted-foreground">
+                      Avg: {bc.avg_score}% · Median: {bc.median_score}% · P25: {bc.percentile_25}% · P75: {bc.percentile_75}% · n={bc.sample_size}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Response Patterns */}
       {patterns && patterns.length > 0 && (
