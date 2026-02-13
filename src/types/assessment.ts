@@ -9,6 +9,7 @@ export type Assessment = {
   type: AssessmentType;
   status: AssessmentStatus;
   settings_json: any;
+  portal_visible: boolean;
   created_at: string;
   updated_at: string;
 };

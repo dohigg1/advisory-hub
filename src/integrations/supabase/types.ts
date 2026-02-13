@@ -137,6 +137,7 @@ export type Database = {
           description: string | null
           id: string
           org_id: string
+          portal_visible: boolean
           settings_json: Json | null
           status: Database["public"]["Enums"]["assessment_status"]
           title: string
@@ -148,6 +149,7 @@ export type Database = {
           description?: string | null
           id?: string
           org_id: string
+          portal_visible?: boolean
           settings_json?: Json | null
           status?: Database["public"]["Enums"]["assessment_status"]
           title: string
@@ -159,6 +161,7 @@ export type Database = {
           description?: string | null
           id?: string
           org_id?: string
+          portal_visible?: boolean
           settings_json?: Json | null
           status?: Database["public"]["Enums"]["assessment_status"]
           title?: string
@@ -436,6 +439,7 @@ export type Database = {
           name: string
           plan_tier: string
           primary_colour: string | null
+          slug: string | null
         }
         Insert: {
           created_at?: string
@@ -444,6 +448,7 @@ export type Database = {
           name: string
           plan_tier?: string
           primary_colour?: string | null
+          slug?: string | null
         }
         Update: {
           created_at?: string
@@ -452,8 +457,120 @@ export type Database = {
           name?: string
           plan_tier?: string
           primary_colour?: string | null
+          slug?: string | null
         }
         Relationships: []
+      }
+      portal_access_logs: {
+        Row: {
+          accessed_at: string
+          action: string | null
+          id: string
+          lead_email: string
+          org_id: string
+        }
+        Insert: {
+          accessed_at?: string
+          action?: string | null
+          id?: string
+          lead_email: string
+          org_id: string
+        }
+        Update: {
+          accessed_at?: string
+          action?: string | null
+          id?: string
+          lead_email?: string
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_access_logs_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portal_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          last_accessed_at: string | null
+          lead_email: string
+          org_id: string
+          token_hash: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          last_accessed_at?: string | null
+          lead_email: string
+          org_id: string
+          token_hash: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          last_accessed_at?: string | null
+          lead_email?: string
+          org_id?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_sessions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portal_settings: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          org_id: string
+          portal_description: string | null
+          show_powered_by: boolean
+          updated_at: string
+          welcome_message: string | null
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          org_id: string
+          portal_description?: string | null
+          show_powered_by?: boolean
+          updated_at?: string
+          welcome_message?: string | null
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          org_id?: string
+          portal_description?: string | null
+          show_powered_by?: boolean
+          updated_at?: string
+          welcome_message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_settings_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
