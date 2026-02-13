@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import type { Assessment } from "@/types/assessment";
 
 interface Props {
@@ -37,7 +38,7 @@ export function SettingsTab({ assessment, onUpdate }: Props) {
     <div className="space-y-6 animate-fade-in max-w-2xl">
       <div>
         <h2 className="text-lg font-semibold">Settings</h2>
-        <p className="text-sm text-muted-foreground">Configure assessment behaviour and lead capture</p>
+        <p className="text-sm text-muted-foreground">Configure assessment behaviour, emails, and webhooks</p>
       </div>
 
       {/* Lead Form */}
@@ -90,6 +91,128 @@ export function SettingsTab({ assessment, onUpdate }: Props) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Results Email */}
+      <Card className="border shadow-sm">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm font-medium">Results Email</CardTitle>
+            <Switch
+              checked={settings.results_email_enabled ?? true}
+              onCheckedChange={v => updateSettings({ results_email_enabled: v })}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Send an email with score summary when assessment is completed</p>
+        </CardHeader>
+        {(settings.results_email_enabled ?? true) && (
+          <CardContent className="space-y-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Subject line</Label>
+              <Input
+                value={settings.results_email_subject ?? "Your {assessment_title} Results"}
+                onChange={e => updateSettings({ results_email_subject: e.target.value })}
+                placeholder="Your {assessment_title} Results"
+              />
+              <p className="text-xs text-muted-foreground">
+                Merge fields: {"{first_name}"}, {"{assessment_title}"}, {"{score_percentage}"}, {"{tier_label}"}
+              </p>
+            </div>
+          </CardContent>
+        )}
+      </Card>
+
+      {/* Abandon Email */}
+      <Card className="border shadow-sm">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm font-medium">Abandon Email</CardTitle>
+            <Switch
+              checked={settings.abandon_email_enabled ?? true}
+              onCheckedChange={v => updateSettings({ abandon_email_enabled: v })}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Send a reminder if someone starts but doesn't finish (after 1 hour)</p>
+        </CardHeader>
+        {(settings.abandon_email_enabled ?? true) && (
+          <CardContent className="space-y-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Subject line</Label>
+              <Input
+                value={settings.abandon_email_subject ?? "Don't forget to finish your {assessment_title}"}
+                onChange={e => updateSettings({ abandon_email_subject: e.target.value })}
+              />
+            </div>
+          </CardContent>
+        )}
+      </Card>
+
+      {/* Email Sender */}
+      <Card className="border shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Email Sender</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">From name</Label>
+            <Input
+              value={settings.email_from_name ?? ""}
+              onChange={e => updateSettings({ email_from_name: e.target.value })}
+              placeholder="Your Company Name"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">From address</Label>
+            <Input
+              value={settings.email_from_address ?? ""}
+              onChange={e => updateSettings({ email_from_address: e.target.value })}
+              placeholder="noreply@advisoryscore.com"
+            />
+            <p className="text-xs text-muted-foreground">Requires domain verification in your email provider</p>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">Reply-to address</Label>
+            <Input
+              value={settings.email_reply_to ?? ""}
+              onChange={e => updateSettings({ email_reply_to: e.target.value })}
+              placeholder="hello@yourcompany.com"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Separator />
+
+      {/* Webhook */}
+      <Card className="border shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Webhook</CardTitle>
+          <p className="text-xs text-muted-foreground">Send assessment data to an external URL on completion</p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">Webhook URL</Label>
+            <Input
+              value={settings.webhook_url ?? ""}
+              onChange={e => updateSettings({ webhook_url: e.target.value })}
+              placeholder="https://your-crm.com/webhook"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">Secret key (for HMAC signature)</Label>
+            <Input
+              type="password"
+              value={settings.webhook_secret ?? ""}
+              onChange={e => updateSettings({ webhook_secret: e.target.value })}
+              placeholder="whsec_..."
+            />
+            <p className="text-xs text-muted-foreground">
+              Used to sign payloads with HMAC SHA-256 in the X-Webhook-Signature header
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Separator />
 
       {/* Completion */}
       <Card className="border shadow-sm">
