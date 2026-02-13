@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import type { ResultsPageSection } from "@/types/results-page";
+import type { AssessmentIteration, IterationHistory } from "@/types/iteration";
 import { AssessmentHeader } from "@/components/public-assessment/AssessmentHeader";
 import { OverallScoreSection } from "@/components/results-page/sections/OverallScoreSection";
 import { CategoryBreakdownSection } from "@/components/results-page/sections/CategoryBreakdownSection";
@@ -12,6 +13,7 @@ import { DynamicTextSection } from "@/components/results-page/sections/DynamicTe
 import { CtaSection } from "@/components/results-page/sections/CtaSection";
 import { NextStepsSection } from "@/components/results-page/sections/NextStepsSection";
 import { ConsultantInfoSection } from "@/components/results-page/sections/ConsultantInfoSection";
+import { ProgressComparisonSection } from "@/components/results-page/sections/ProgressComparisonSection";
 import { ShareButtons } from "@/components/results-page/sections/ShareButtons";
 
 type ScoreTier = Tables<"score_tiers">;
@@ -28,7 +30,7 @@ export interface CategoryScore {
 export interface BenchmarkData {
   overall: { avg_score: number; median_score: number; percentile_25: number; percentile_75: number; sample_size: number } | null;
   categories: Record<string, { avg_score: number; median_score: number; percentile_25: number; percentile_75: number; sample_size: number }>;
-  percentileRank: number | null; // "You scored higher than X%"
+  percentileRank: number | null;
 }
 
 export interface ResultsData {
@@ -43,6 +45,7 @@ export interface ResultsData {
   sections: ResultsPageSection[];
   brandColour: string;
   benchmarks: BenchmarkData | null;
+  iterationHistory: IterationHistory | null;
 }
 
 export default function PublicResults() {
@@ -57,7 +60,6 @@ export default function PublicResults() {
   }, [leadId]);
 
   const loadResults = async (leadId: string) => {
-    // Get lead
     const { data: lead, error: leadErr } = await supabase
       .from("leads")
       .select("*")
@@ -66,7 +68,6 @@ export default function PublicResults() {
 
     if (leadErr || !lead) { setNotFound(true); setLoading(false); return; }
 
-    // Fetch score, assessment, categories, tiers, org, results_page in parallel
     const [scoreRes, assessmentRes, categoriesRes, tiersRes, orgRes, resultsPageRes] = await Promise.all([
       supabase.from("scores").select("*").eq("lead_id", leadId).maybeSingle(),
       supabase.from("assessments").select("*").eq("id", lead.assessment_id).single(),
@@ -84,18 +85,11 @@ export default function PublicResults() {
     const score = scoreRes.data;
     const catScoresJson = (score?.category_scores_json as Record<string, any>) || {};
 
-    // Build category scores from the pre-calculated scores table
     const categoryScores: CategoryScore[] = categories.map(cat => {
       const cs = catScoresJson[cat.id];
       const percentage = cs?.percentage ?? 0;
       const tier = cs?.tier_id ? scoreTiers.find(t => t.id === cs.tier_id) || null : null;
-      return {
-        category: cat,
-        totalPoints: cs?.points ?? 0,
-        maxPoints: cs?.possible ?? 0,
-        percentage,
-        tier,
-      };
+      return { category: cat, totalPoints: cs?.points ?? 0, maxPoints: cs?.possible ?? 0, percentage, tier };
     });
 
     const overallPercentage = score?.percentage != null ? Number(score.percentage) : 0;
@@ -106,6 +100,33 @@ export default function PublicResults() {
       : getDefaultSections();
 
     const brandColour = orgRes.data?.primary_colour || "#1B3A5C";
+
+    // Fetch iteration history
+    let iterationHistory: IterationHistory | null = null;
+    try {
+      const { data: iterations } = await supabase
+        .from("assessment_iterations" as any)
+        .select("*")
+        .eq("lead_email", lead.email)
+        .eq("assessment_id", lead.assessment_id)
+        .order("iteration_number", { ascending: true });
+
+      if (iterations && iterations.length > 0) {
+        const typedIterations = iterations as unknown as AssessmentIteration[];
+        const currentIt = typedIterations.find(it => it.lead_id === leadId) || typedIterations[typedIterations.length - 1];
+        const currentIdx = typedIterations.indexOf(currentIt);
+        const previousIt = currentIdx > 0 ? typedIterations[currentIdx - 1] : null;
+
+        iterationHistory = {
+          iterations: typedIterations,
+          currentIteration: currentIt,
+          previousIteration: previousIt,
+          isRetake: typedIterations.length > 1,
+        };
+      }
+    } catch (e) {
+      console.error("Failed to load iteration history:", e);
+    }
 
     // Fetch benchmarks
     let benchmarks: BenchmarkData | null = null;
@@ -127,10 +148,8 @@ export default function PublicResults() {
           }
         });
 
-        // Calculate percentile rank
         let percentileRank: number | null = null;
         if (overallBm && overallBm.sample_size >= minSample && score?.percentage != null) {
-          // Approximate percentile from quartiles
           const pct = Number(score.percentage);
           if (pct <= Number(overallBm.percentile_25)) percentileRank = Math.round((pct / Number(overallBm.percentile_25)) * 25);
           else if (pct <= Number(overallBm.median_score)) percentileRank = Math.round(25 + ((pct - Number(overallBm.percentile_25)) / (Number(overallBm.median_score) - Number(overallBm.percentile_25))) * 25);
@@ -159,6 +178,7 @@ export default function PublicResults() {
       sections,
       brandColour,
       benchmarks,
+      iterationHistory,
     });
     setLoading(false);
   };
@@ -192,6 +212,9 @@ export default function PublicResults() {
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Your Assessment Results</h1>
           <p className="text-muted-foreground text-sm">
             {data.assessment.title} · Completed {data.lead.completed_at ? new Date(data.lead.completed_at).toLocaleDateString() : ""}
+            {data.iterationHistory?.isRetake && (
+              <span className="ml-1.5">· Attempt #{data.iterationHistory.currentIteration?.iteration_number}</span>
+            )}
           </p>
         </div>
 
@@ -207,6 +230,7 @@ export default function PublicResults() {
               case "cta": return <CtaSection key={key} section={section} data={data} />;
               case "next_steps": return <NextStepsSection key={key} section={section} data={data} />;
               case "consultant_info": return <ConsultantInfoSection key={key} section={section} data={data} />;
+              case "progress_comparison": return <ProgressComparisonSection key={key} section={section} data={data} />;
               default: return null;
             }
           })

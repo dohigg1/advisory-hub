@@ -290,6 +290,31 @@ export function SettingsTab({ assessment, onUpdate }: Props) {
               onCheckedChange={v => updateSettings({ allow_retakes: v })}
             />
           </div>
+          {(settings.allow_retakes ?? false) && (
+            <>
+              <div className="space-y-1.5 ml-4 pl-4 border-l-2 border-border/50">
+                <Label className="text-xs font-medium">Minimum days between retakes</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={settings.retake_min_days ?? 0}
+                  onChange={e => updateSettings({ retake_min_days: parseInt(e.target.value) || 0 })}
+                  className="w-24"
+                />
+                <p className="text-xs text-muted-foreground">Set to 0 for no limit. Prevents gaming the assessment.</p>
+              </div>
+              <div className="flex items-center justify-between ml-4 pl-4 border-l-2 border-border/50">
+                <div>
+                  <p className="text-sm">Show previous results on retake</p>
+                  <p className="text-xs text-muted-foreground">Let respondents see their past scores when retaking</p>
+                </div>
+                <Switch
+                  checked={settings.show_previous_on_retake ?? true}
+                  onCheckedChange={v => updateSettings({ show_previous_on_retake: v })}
+                />
+              </div>
+            </>
+          )}
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm">Show progress bar</p>

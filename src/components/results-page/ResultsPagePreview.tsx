@@ -3,6 +3,7 @@ import type { ResultsPageSection } from "@/types/results-page";
 import type { ResultsData, CategoryScore } from "@/pages/PublicResults";
 import type { ScoreTier, Category } from "@/types/assessment";
 import type { Tables } from "@/integrations/supabase/types";
+import type { IterationHistory } from "@/types/iteration";
 import { OverallScoreSection } from "./sections/OverallScoreSection";
 import { CategoryBreakdownSection } from "./sections/CategoryBreakdownSection";
 import { RadarChartSection } from "./sections/RadarChartSection";
@@ -11,6 +12,7 @@ import { DynamicTextSection } from "./sections/DynamicTextSection";
 import { CtaSection } from "./sections/CtaSection";
 import { NextStepsSection } from "./sections/NextStepsSection";
 import { ConsultantInfoSection } from "./sections/ConsultantInfoSection";
+import { ProgressComparisonSection } from "./sections/ProgressComparisonSection";
 
 interface Props {
   sections: ResultsPageSection[];
@@ -27,18 +29,11 @@ function buildMockData(
   assessment: Tables<"assessments">,
   orgColour: string
 ): ResultsData {
-  // Generate mock category scores with spread percentages
   const mockPercentages = [85, 72, 60, 90, 45, 78, 55, 68];
   const categoryScores: CategoryScore[] = categories.map((cat, i) => {
     const pct = mockPercentages[i % mockPercentages.length];
     const tier = scoreTiers.find(t => pct >= t.min_pct && pct <= t.max_pct) || null;
-    return {
-      category: cat,
-      totalPoints: Math.round(pct * 0.3),
-      maxPoints: 30,
-      percentage: pct,
-      tier,
-    };
+    return { category: cat, totalPoints: Math.round(pct * 0.3), maxPoints: 30, percentage: pct, tier };
   });
 
   const overallPercentage = categories.length > 0
@@ -47,26 +42,39 @@ function buildMockData(
 
   const overallTier = scoreTiers.find(t => overallPercentage >= t.min_pct && overallPercentage <= t.max_pct) || scoreTiers[0] || null;
 
+  // Mock iteration history for preview
+  const previousPercentages = [70, 58, 50, 82, 35, 65, 48, 55];
+  const prevCategoryScores: Record<string, any> = {};
+  categories.forEach((cat, i) => {
+    const pct = previousPercentages[i % previousPercentages.length];
+    prevCategoryScores[cat.id] = { points: Math.round(pct * 0.3), possible: 30, percentage: pct };
+  });
+  const prevOverall = categories.length > 0
+    ? Math.round(previousPercentages.slice(0, categories.length).reduce((s, p) => s + p, 0) / categories.length)
+    : 60;
+
+  const currCategoryScores: Record<string, any> = {};
+  categoryScores.forEach(cs => {
+    currCategoryScores[cs.category.id] = { points: cs.totalPoints, possible: cs.maxPoints, percentage: cs.percentage };
+  });
+
+  const mockHistory: IterationHistory = {
+    iterations: [
+      { id: "prev", lead_email: "preview@example.com", assessment_id: assessment.id, iteration_number: 1, lead_id: "prev-lead", score_id: null, overall_percentage: prevOverall, category_scores_json: prevCategoryScores, completed_at: new Date(Date.now() - 30 * 86400000).toISOString(), created_at: "" },
+      { id: "curr", lead_email: "preview@example.com", assessment_id: assessment.id, iteration_number: 2, lead_id: "preview", score_id: null, overall_percentage: overallPercentage, category_scores_json: currCategoryScores, completed_at: new Date().toISOString(), created_at: "" },
+    ],
+    currentIteration: { id: "curr", lead_email: "preview@example.com", assessment_id: assessment.id, iteration_number: 2, lead_id: "preview", score_id: null, overall_percentage: overallPercentage, category_scores_json: currCategoryScores, completed_at: new Date().toISOString(), created_at: "" },
+    previousIteration: { id: "prev", lead_email: "preview@example.com", assessment_id: assessment.id, iteration_number: 1, lead_id: "prev-lead", score_id: null, overall_percentage: prevOverall, category_scores_json: prevCategoryScores, completed_at: new Date(Date.now() - 30 * 86400000).toISOString(), created_at: "" },
+    isRetake: true,
+  };
+
   return {
     lead: {
-      id: "preview",
-      assessment_id: assessment.id,
-      org_id: "",
-      email: "preview@example.com",
-      first_name: "Jane",
-      last_name: "Doe",
-      company: "Example Corp",
-      phone: null,
-      status: "completed",
-      source: "preview",
-      started_at: new Date().toISOString(),
-      completed_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
-      score_id: null,
-      ip_address: null,
-      utm_json: null,
-      custom_fields_json: null,
-      abandon_email_sent: false,
+      id: "preview", assessment_id: assessment.id, org_id: "", email: "preview@example.com",
+      first_name: "Jane", last_name: "Doe", company: "Example Corp", phone: null,
+      status: "completed", source: "preview", started_at: new Date().toISOString(),
+      completed_at: new Date().toISOString(), created_at: new Date().toISOString(),
+      score_id: null, ip_address: null, utm_json: null, custom_fields_json: null, abandon_email_sent: false,
     },
     organisation: null,
     assessment,
@@ -78,6 +86,7 @@ function buildMockData(
     sections,
     brandColour: orgColour,
     benchmarks: null,
+    iterationHistory: mockHistory,
   };
 }
 
@@ -103,7 +112,6 @@ export function ResultsPagePreview({ sections, scoreTiers, categories, assessmen
   return (
     <div className="min-h-full" style={{ background: "linear-gradient(180deg, hsl(210 20% 97%) 0%, hsl(210 15% 94%) 100%)" }}>
       <div className="max-w-3xl mx-auto px-6 py-10 space-y-8">
-        {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Your Assessment Results</h1>
           <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest">Preview · Sample Data</p>
@@ -120,6 +128,7 @@ export function ResultsPagePreview({ sections, scoreTiers, categories, assessmen
             case "cta": return <CtaSection key={key} section={section} data={mockData} />;
             case "next_steps": return <NextStepsSection key={key} section={section} data={mockData} />;
             case "consultant_info": return <ConsultantInfoSection key={key} section={section} data={mockData} />;
+            case "progress_comparison": return <ProgressComparisonSection key={key} section={section} data={mockData} />;
             default: return null;
           }
         })}
@@ -127,4 +136,3 @@ export function ResultsPagePreview({ sections, scoreTiers, categories, assessmen
     </div>
   );
 }
-
