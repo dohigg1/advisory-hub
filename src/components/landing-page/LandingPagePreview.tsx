@@ -14,9 +14,10 @@ interface Props {
   settings: LandingPageSettings;
   organisation: Tables<"organisations"> | null;
   assessmentTitle: string;
+  slug?: string;
 }
 
-export function LandingPagePreview({ sections, settings, organisation, assessmentTitle }: Props) {
+export function LandingPagePreview({ sections, settings, organisation, assessmentTitle, slug }: Props) {
   const s = settings;
 
   if (sections.length === 0) {
@@ -42,7 +43,7 @@ export function LandingPagePreview({ sections, settings, organisation, assessmen
       </div>
 
       {sections.map((section) => {
-        const props = { content: section.content_json, settings: s };
+        const props = { content: section.content_json, settings: s, slug };
         switch (section.type) {
           case "hero": return <PreviewHero key={section.id} {...props} />;
           case "value_proposition": return <PreviewValueProp key={section.id} {...props} />;
