@@ -411,6 +411,38 @@ export type Database = {
           },
         ]
       }
+      results_pages: {
+        Row: {
+          assessment_id: string
+          created_at: string
+          id: string
+          sections_json: Json
+          updated_at: string
+        }
+        Insert: {
+          assessment_id: string
+          created_at?: string
+          id?: string
+          sections_json?: Json
+          updated_at?: string
+        }
+        Update: {
+          assessment_id?: string
+          created_at?: string
+          id?: string
+          sections_json?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "results_pages_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: true
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       score_tiers: {
         Row: {
           assessment_id: string
