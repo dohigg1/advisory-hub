@@ -356,6 +356,7 @@ export type Database = {
       is_org_admin: { Args: { _org_id: string }; Returns: boolean }
       is_org_member: { Args: { _org_id: string }; Returns: boolean }
       question_org_id: { Args: { _question_id: string }; Returns: string }
+      user_has_no_org: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "editor" | "viewer"
