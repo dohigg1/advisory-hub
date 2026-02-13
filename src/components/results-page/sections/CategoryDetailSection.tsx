@@ -21,6 +21,7 @@ export function CategoryDetailSection({ section, data }: Props) {
 
   const tierColour = cs.tier?.colour || data.brandColour;
   const chartData = [{ name: "score", value: cs.percentage, fill: tierColour }];
+  const benchmark = data.benchmarks?.categories?.[cs.category.id];
 
   return (
     <section className="bg-white rounded-xl shadow-sm border p-8">
@@ -48,6 +49,20 @@ export function CategoryDetailSection({ section, data }: Props) {
             </span>
           )}
           {c.content && <p className="text-slate-600 text-sm leading-relaxed">{c.content}</p>}
+
+          {benchmark && (
+            <div className="mt-3 flex items-center gap-4 text-xs text-slate-500">
+              <span>Industry average: <strong className="text-slate-700">{benchmark.avg_score}%</strong></span>
+              <span>|</span>
+              <span>Your score: <strong className="text-slate-700">{cs.percentage}%</strong></span>
+              {cs.percentage > benchmark.avg_score && (
+                <span className="text-green-600 font-medium">+{cs.percentage - benchmark.avg_score}% above avg</span>
+              )}
+              {cs.percentage < benchmark.avg_score && (
+                <span className="text-amber-600 font-medium">{benchmark.avg_score - cs.percentage}% below avg</span>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </section>

@@ -107,6 +107,71 @@ export type Database = {
           },
         ]
       }
+      benchmarks: {
+        Row: {
+          assessment_id: string
+          avg_score: number
+          category_id: string | null
+          id: string
+          median_score: number
+          percentile_25: number
+          percentile_75: number
+          sample_size: number
+          updated_at: string
+        }
+        Insert: {
+          assessment_id: string
+          avg_score?: number
+          category_id?: string | null
+          id?: string
+          median_score?: number
+          percentile_25?: number
+          percentile_75?: number
+          sample_size?: number
+          updated_at?: string
+        }
+        Update: {
+          assessment_id?: string
+          avg_score?: number
+          category_id?: string | null
+          id?: string
+          median_score?: number
+          percentile_25?: number
+          percentile_75?: number
+          sample_size?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "benchmarks_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "benchmarks_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "top_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "benchmarks_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "benchmarks_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "category_averages"
+            referencedColumns: ["category_id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           assessment_id: string
@@ -1013,6 +1078,10 @@ export type Database = {
       is_org_admin: { Args: { _org_id: string }; Returns: boolean }
       is_org_member: { Args: { _org_id: string }; Returns: boolean }
       question_org_id: { Args: { _question_id: string }; Returns: string }
+      recalculate_benchmarks: {
+        Args: { _assessment_id: string }
+        Returns: undefined
+      }
       user_has_no_org: { Args: never; Returns: boolean }
     }
     Enums: {

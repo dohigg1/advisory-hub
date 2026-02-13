@@ -9,10 +9,13 @@ interface Props {
 
 export function RadarChartSection({ section, data }: Props) {
   const c = section.content_json;
+  const benchmarks = data.benchmarks?.categories || {};
+  const hasBenchmarks = Object.keys(benchmarks).length > 0;
 
   const chartData = data.categoryScores.map(cs => ({
     category: cs.category.name,
     score: cs.percentage,
+    benchmark: benchmarks[cs.category.id]?.avg_score ?? null,
     fullMark: 100,
   }));
 
@@ -35,8 +38,19 @@ export function RadarChartSection({ section, data }: Props) {
             <PolarGrid stroke="#e2e8f0" />
             <PolarAngleAxis dataKey="category" tick={{ fontSize: 12, fill: "#475569" }} />
             <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10 }} />
+            {hasBenchmarks && (
+              <Radar
+                name="Industry Avg"
+                dataKey="benchmark"
+                stroke="#94a3b8"
+                fill="#94a3b8"
+                fillOpacity={0.1}
+                strokeWidth={1.5}
+                strokeDasharray="4 4"
+              />
+            )}
             <Radar
-              name="Score"
+              name="Your Score"
               dataKey="score"
               stroke={data.brandColour}
               fill={data.brandColour}
@@ -46,6 +60,17 @@ export function RadarChartSection({ section, data }: Props) {
           </RadarChart>
         </ResponsiveContainer>
       </div>
+
+      {hasBenchmarks && (
+        <div className="flex justify-center gap-6 mt-2 text-xs text-slate-500">
+          <span className="flex items-center gap-1.5">
+            <span className="w-4 h-0.5 rounded" style={{ backgroundColor: data.brandColour }} /> Your Score
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-4 h-0.5 rounded border-dashed border-t-2 border-slate-400" /> Industry Avg
+          </span>
+        </div>
+      )}
     </section>
   );
 }
