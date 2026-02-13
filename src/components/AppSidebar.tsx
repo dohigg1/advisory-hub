@@ -29,37 +29,37 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
-      <SidebarHeader className="p-4">
+      <SidebarHeader className="p-5">
         <div className="flex items-center gap-3">
           {organisation?.logo_url ? (
-            <img src={organisation.logo_url} alt="" className="h-8 w-8 object-contain flex-shrink-0" />
+            <img src={organisation.logo_url} alt="" className="h-8 w-8 rounded-md object-contain flex-shrink-0" />
           ) : (
-            <div className="flex h-8 w-8 items-center justify-center bg-sidebar-accent flex-shrink-0">
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-sidebar-accent flex-shrink-0">
               <BarChart3 className="h-4 w-4 text-sidebar-foreground" />
             </div>
           )}
           {!collapsed && (
-            <span className="text-sm font-semibold text-sidebar-foreground truncate">
+            <span className="text-sm font-bold text-sidebar-foreground tracking-tight truncate">
               AdvisoryScore
             </span>
           )}
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-2">
+      <SidebarContent className="px-3 mt-2">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-1">
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
                     <NavLink
                       to={item.url}
                       end={item.url === "/"}
-                      className="flex items-center gap-3 px-3 py-2 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
-                      activeClassName="bg-sidebar-accent text-sidebar-foreground font-medium"
+                      className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all duration-150"
+                      activeClassName="bg-sidebar-accent text-sidebar-foreground shadow-soft-sm"
                     >
-                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      <item.icon className="h-[18px] w-[18px] flex-shrink-0" />
                       <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
@@ -70,9 +70,9 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4">
+      <SidebarFooter className="p-5">
         {!collapsed && (
-          <div className="text-xs text-sidebar-foreground/50">
+          <div className="text-[11px] font-medium uppercase tracking-widest text-sidebar-foreground/30">
             {organisation?.plan_tier === "free" ? "Free plan" : organisation?.plan_tier}
           </div>
         )}
