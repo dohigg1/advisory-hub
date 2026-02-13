@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { LeadCaptureForm } from "@/components/public-assessment/LeadCaptureForm";
@@ -28,6 +28,7 @@ type FlowStep = "loading" | "landing" | "lead_form" | "questions" | "calculating
 export default function PublicAssessment() {
   const { slug } = useParams<{ slug: string }>();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [step, setStep] = useState<FlowStep>("loading");
   const [data, setData] = useState<AssessmentData | null>(null);
   const [leadId, setLeadId] = useState<string | null>(null);
@@ -118,11 +119,12 @@ export default function PublicAssessment() {
     if (position === "before") {
       setStep("questions");
     } else {
-      // After questions, lead form was shown, now calculate
+      // After questions, lead form was shown, now calculate & redirect
       setStep("calculating");
-      setTimeout(() => setStep("completed"), 2000);
+      supabase.from("leads").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", newLeadId).then();
+      setTimeout(() => navigate(`/results/${newLeadId}`), 2000);
     }
-  }, [data]);
+  }, [data, navigate]);
 
   const handleQuestionsCompleted = useCallback(() => {
     const position = data?.settings.lead_form_position || "before";
@@ -131,14 +133,15 @@ export default function PublicAssessment() {
     } else {
       setStep("calculating");
       setTimeout(() => {
-        // Mark lead as completed
         if (leadId) {
           supabase.from("leads").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", leadId).then();
+          navigate(`/results/${leadId}`);
+        } else {
+          setStep("completed");
         }
-        setStep("completed");
       }, 2000);
     }
-  }, [data, leadId]);
+  }, [data, leadId, navigate]);
 
   const handleAlreadyCompleted = useCallback(() => {
     setStep("already_completed");
