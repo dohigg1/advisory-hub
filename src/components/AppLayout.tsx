@@ -10,8 +10,10 @@ export function AppLayout() {
         <AppSidebar />
         <div className="flex flex-1 flex-col min-w-0">
           <TopBar />
-          <main className="flex-1 p-8">
-            <Outlet />
+          <main className="flex-1 p-6 lg:p-8 gradient-mesh">
+            <div className="max-w-[1400px] mx-auto">
+              <Outlet />
+            </div>
           </main>
         </div>
       </div>
