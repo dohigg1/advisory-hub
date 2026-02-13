@@ -59,16 +59,30 @@ export function LeadCaptureForm({ data, utmParams, brandColour, onSubmitted, onA
     // Check for existing completed submission
     const { data: existing } = await supabase
       .from("leads")
-      .select("id, status")
+      .select("id, status, completed_at")
       .eq("email", form.email.trim())
       .eq("assessment_id", assessment.id)
       .eq("status", "completed")
+      .order("completed_at", { ascending: false })
+      .limit(1)
       .maybeSingle();
 
     if (existing && !settings.allow_retakes) {
       onAlreadyCompleted();
       setSubmitting(false);
       return;
+    }
+
+    // Enforce minimum days between retakes
+    if (existing && settings.allow_retakes && settings.retake_min_days > 0 && existing.completed_at) {
+      const lastCompleted = new Date(existing.completed_at);
+      const minDaysMs = (settings.retake_min_days as number) * 86400000;
+      if (Date.now() - lastCompleted.getTime() < minDaysMs) {
+        const daysLeft = Math.ceil((minDaysMs - (Date.now() - lastCompleted.getTime())) / 86400000);
+        setError(`You can retake this assessment in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}.`);
+        setSubmitting(false);
+        return;
+      }
     }
 
     // Clean UTM

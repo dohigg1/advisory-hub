@@ -63,6 +63,74 @@ export type Database = {
           },
         ]
       }
+      assessment_iterations: {
+        Row: {
+          assessment_id: string
+          category_scores_json: Json | null
+          completed_at: string
+          created_at: string
+          id: string
+          iteration_number: number
+          lead_email: string
+          lead_id: string
+          overall_percentage: number | null
+          score_id: string | null
+        }
+        Insert: {
+          assessment_id: string
+          category_scores_json?: Json | null
+          completed_at?: string
+          created_at?: string
+          id?: string
+          iteration_number?: number
+          lead_email: string
+          lead_id: string
+          overall_percentage?: number | null
+          score_id?: string | null
+        }
+        Update: {
+          assessment_id?: string
+          category_scores_json?: Json | null
+          completed_at?: string
+          created_at?: string
+          id?: string
+          iteration_number?: number
+          lead_email?: string
+          lead_id?: string
+          overall_percentage?: number | null
+          score_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_iterations_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_iterations_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "top_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_iterations_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_iterations_score_id_fkey"
+            columns: ["score_id"]
+            isOneToOne: false
+            referencedRelation: "scores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessments: {
         Row: {
           created_at: string

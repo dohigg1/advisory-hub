@@ -114,17 +114,14 @@ Deno.serve(async (req) => {
       let totalPossible = 0;
 
       if (q.type === "sliding_scale") {
-        // For sliding scale: points = selected value, possible = max value
         const settings = (q.settings_json as any) || {};
         totalPossible = settings.max ?? 10;
         if (response && response.selected_option_ids?.length > 0) {
-          // The "option id" for sliding scale stores the numeric value
           pointsAwarded = parseInt(response.selected_option_ids[0]) || 0;
         } else if (response) {
           pointsAwarded = response.points_awarded || 0;
         }
       } else if (q.type === "checkbox_select") {
-        // Multi-select: sum points of all selected; possible = sum of all positive-value options
         totalPossible = qOptions
           .filter((o: any) => o.points > 0)
           .reduce((s: number, o: any) => s + o.points, 0);
@@ -135,7 +132,6 @@ Deno.serve(async (req) => {
             .reduce((s: number, o: any) => s + o.points, 0);
         }
       } else {
-        // Single-select: max points of any option is possible
         totalPossible =
           qOptions.length > 0
             ? Math.max(...qOptions.map((o: any) => o.points))
@@ -279,6 +275,31 @@ Deno.serve(async (req) => {
         completed_at: new Date().toISOString(),
       })
       .eq("id", lead_id);
+
+    // ── Iteration tracking ──────────────────────────────────
+    try {
+      // Count existing iterations for this email + assessment
+      const { count } = await supabase
+        .from("assessment_iterations")
+        .select("id", { count: "exact", head: true })
+        .eq("lead_email", lead.email)
+        .eq("assessment_id", assessmentId);
+
+      const iterationNumber = (count ?? 0) + 1;
+
+      await supabase.from("assessment_iterations").insert({
+        lead_email: lead.email,
+        assessment_id: assessmentId,
+        iteration_number: iterationNumber,
+        lead_id: lead_id,
+        score_id: scoreRecord.id,
+        overall_percentage: overallPct,
+        category_scores_json: categoryScoresJson,
+        completed_at: new Date().toISOString(),
+      });
+    } catch (iterErr) {
+      console.error("Iteration tracking failed (non-fatal):", iterErr);
+    }
 
     // Fire automations in background (don't block response)
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;

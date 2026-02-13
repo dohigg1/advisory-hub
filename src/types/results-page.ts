@@ -6,7 +6,8 @@ export type ResultsSectionType =
   | "dynamic_text"
   | "cta"
   | "next_steps"
-  | "consultant_info";
+  | "consultant_info"
+  | "progress_comparison";
 
 export interface ResultsPageSection {
   id: string;
@@ -25,6 +26,7 @@ export const RESULTS_SECTION_LABELS: Record<ResultsSectionType, string> = {
   cta: "CTA Section",
   next_steps: "Next Steps",
   consultant_info: "Consultant Info",
+  progress_comparison: "Progress Comparison",
 };
 
 export const RESULTS_SECTION_DESCRIPTIONS: Record<ResultsSectionType, string> = {
@@ -36,6 +38,7 @@ export const RESULTS_SECTION_DESCRIPTIONS: Record<ResultsSectionType, string> = 
   cta: "Call to action, optionally dynamic by tier",
   next_steps: "Recommended actions list, optionally dynamic by tier",
   consultant_info: "Consultant/firm contact card",
+  progress_comparison: "Before/after comparison for retakes (iteration 2+)",
 };
 
 export function createDefaultResultsSection(type: ResultsSectionType, sortOrder: number): ResultsPageSection {
@@ -88,6 +91,12 @@ export function createDefaultResultsSection(type: ResultsSectionType, sortOrder:
       phone: "",
       linkedin_url: "",
       bio: "",
+    },
+    progress_comparison: {
+      heading: "Your Progress",
+      show_radar: true,
+      show_category_table: true,
+      show_trend_line: true,
     },
   };
 
