@@ -44,8 +44,22 @@ export type Database = {
             foreignKeyName: "answer_options_question_id_fkey"
             columns: ["question_id"]
             isOneToOne: false
+            referencedRelation: "dropoff_analysis"
+            referencedColumns: ["question_id"]
+          },
+          {
+            foreignKeyName: "answer_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
             referencedRelation: "questions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "answer_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "response_patterns"
+            referencedColumns: ["question_id"]
           },
         ]
       }
@@ -132,6 +146,13 @@ export type Database = {
             referencedRelation: "assessments"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "categories_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "top_assessments"
+            referencedColumns: ["id"]
+          },
         ]
       }
       landing_pages: {
@@ -171,6 +192,13 @@ export type Database = {
             columns: ["assessment_id"]
             isOneToOne: false
             referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "landing_pages_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "top_assessments"
             referencedColumns: ["id"]
           },
         ]
@@ -242,6 +270,13 @@ export type Database = {
             columns: ["assessment_id"]
             isOneToOne: false
             referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "top_assessments"
             referencedColumns: ["id"]
           },
           {
@@ -371,11 +406,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "questions_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "top_assessments"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "questions_category_id_fkey"
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "category_averages"
+            referencedColumns: ["category_id"]
           },
         ]
       }
@@ -419,8 +468,22 @@ export type Database = {
             foreignKeyName: "responses_question_id_fkey"
             columns: ["question_id"]
             isOneToOne: false
+            referencedRelation: "dropoff_analysis"
+            referencedColumns: ["question_id"]
+          },
+          {
+            foreignKeyName: "responses_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
             referencedRelation: "questions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "responses_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "response_patterns"
+            referencedColumns: ["question_id"]
           },
         ]
       }
@@ -452,6 +515,13 @@ export type Database = {
             columns: ["assessment_id"]
             isOneToOne: true
             referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "results_pages_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: true
+            referencedRelation: "top_assessments"
             referencedColumns: ["id"]
           },
         ]
@@ -493,6 +563,13 @@ export type Database = {
             columns: ["assessment_id"]
             isOneToOne: false
             referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "score_tiers_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "top_assessments"
             referencedColumns: ["id"]
           },
         ]
@@ -537,6 +614,13 @@ export type Database = {
             columns: ["assessment_id"]
             isOneToOne: false
             referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scores_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "top_assessments"
             referencedColumns: ["id"]
           },
           {
@@ -684,6 +768,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "webhook_logs_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "top_assessments"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "webhook_logs_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
@@ -694,7 +785,219 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      assessment_analytics: {
+        Row: {
+          assessment_id: string | null
+          avg_score: number | null
+          avg_time_minutes: number | null
+          completion_rate: number | null
+          total_completions: number | null
+          total_starts: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "top_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      category_averages: {
+        Row: {
+          assessment_id: string | null
+          avg_percentage: number | null
+          category_colour: string | null
+          category_id: string | null
+          category_name: string | null
+          sort_order: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scores_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scores_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "top_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      completions_timeline: {
+        Row: {
+          assessment_id: string | null
+          completions: number | null
+          day: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "top_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dropoff_analysis: {
+        Row: {
+          assessment_id: string | null
+          question_id: string | null
+          question_text: string | null
+          respondents: number | null
+          sort_order: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questions_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "top_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_dashboard_stats: {
+        Row: {
+          completions_last_month: number | null
+          completions_this_month: number | null
+          leads_last_month: number | null
+          leads_this_month: number | null
+          org_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      response_patterns: {
+        Row: {
+          assessment_id: string | null
+          option_id: string | null
+          option_sort_order: number | null
+          option_text: string | null
+          question_id: string | null
+          question_text: string | null
+          sort_order: number | null
+          times_selected: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questions_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "top_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      score_distribution: {
+        Row: {
+          assessment_id: string | null
+          bucket_max: number | null
+          bucket_min: number | null
+          count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scores_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scores_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "top_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tier_distribution: {
+        Row: {
+          assessment_id: string | null
+          count: number | null
+          tier_colour: string | null
+          tier_label: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scores_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scores_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "top_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      top_assessments: {
+        Row: {
+          completion_rate: number | null
+          id: string | null
+          org_id: string | null
+          title: string | null
+          total_completions: number | null
+          total_starts: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       assessment_org_id: { Args: { _assessment_id: string }; Returns: string }
