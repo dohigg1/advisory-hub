@@ -177,6 +177,7 @@ export type Database = {
       }
       leads: {
         Row: {
+          abandon_email_sent: boolean
           assessment_id: string
           company: string | null
           completed_at: string | null
@@ -196,6 +197,7 @@ export type Database = {
           utm_json: Json | null
         }
         Insert: {
+          abandon_email_sent?: boolean
           assessment_id: string
           company?: string | null
           completed_at?: string | null
@@ -215,6 +217,7 @@ export type Database = {
           utm_json?: Json | null
         }
         Update: {
+          abandon_email_sent?: boolean
           assessment_id?: string
           company?: string | null
           completed_at?: string | null
@@ -628,6 +631,63 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webhook_logs: {
+        Row: {
+          assessment_id: string
+          attempt: number
+          created_at: string
+          error_message: string | null
+          id: string
+          lead_id: string
+          request_payload: Json
+          response_body: string | null
+          status_code: number | null
+          success: boolean
+          webhook_url: string
+        }
+        Insert: {
+          assessment_id: string
+          attempt?: number
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          lead_id: string
+          request_payload?: Json
+          response_body?: string | null
+          status_code?: number | null
+          success?: boolean
+          webhook_url: string
+        }
+        Update: {
+          assessment_id?: string
+          attempt?: number
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          lead_id?: string
+          request_payload?: Json
+          response_body?: string | null
+          status_code?: number | null
+          success?: boolean
+          webhook_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_logs_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webhook_logs_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
             referencedColumns: ["id"]
           },
         ]
