@@ -13,6 +13,7 @@ import Assessments from "./pages/Assessments";
 import Leads from "./pages/Leads";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
+import AssessmentBuilder from "./pages/AssessmentBuilder";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/assessments/:id" element={<ProtectedRoute><AssessmentBuilder /></ProtectedRoute>} />
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
               <Route path="/" element={<Dashboard />} />
               <Route path="/assessments" element={<Assessments />} />

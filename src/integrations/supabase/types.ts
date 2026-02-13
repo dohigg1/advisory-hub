@@ -14,6 +14,126 @@ export type Database = {
   }
   public: {
     Tables: {
+      answer_options: {
+        Row: {
+          id: string
+          image_url: string | null
+          points: number
+          question_id: string
+          sort_order: number
+          text: string
+        }
+        Insert: {
+          id?: string
+          image_url?: string | null
+          points?: number
+          question_id: string
+          sort_order?: number
+          text?: string
+        }
+        Update: {
+          id?: string
+          image_url?: string | null
+          points?: number
+          question_id?: string
+          sort_order?: number
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "answer_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assessments: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          org_id: string
+          settings_json: Json | null
+          status: Database["public"]["Enums"]["assessment_status"]
+          title: string
+          type: Database["public"]["Enums"]["assessment_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          org_id: string
+          settings_json?: Json | null
+          status?: Database["public"]["Enums"]["assessment_status"]
+          title: string
+          type?: Database["public"]["Enums"]["assessment_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          org_id?: string
+          settings_json?: Json | null
+          status?: Database["public"]["Enums"]["assessment_status"]
+          title?: string
+          type?: Database["public"]["Enums"]["assessment_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      categories: {
+        Row: {
+          assessment_id: string
+          colour: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          include_in_total: boolean
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          assessment_id: string
+          colour?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          include_in_total?: boolean
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          assessment_id?: string
+          colour?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          include_in_total?: boolean
+          name?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organisations: {
         Row: {
           created_at: string
@@ -82,6 +202,98 @@ export type Database = {
           },
         ]
       }
+      questions: {
+        Row: {
+          assessment_id: string
+          category_id: string
+          help_text: string | null
+          id: string
+          is_required: boolean
+          settings_json: Json | null
+          sort_order: number
+          text: string
+          type: Database["public"]["Enums"]["question_type"]
+        }
+        Insert: {
+          assessment_id: string
+          category_id: string
+          help_text?: string | null
+          id?: string
+          is_required?: boolean
+          settings_json?: Json | null
+          sort_order?: number
+          text: string
+          type?: Database["public"]["Enums"]["question_type"]
+        }
+        Update: {
+          assessment_id?: string
+          category_id?: string
+          help_text?: string | null
+          id?: string
+          is_required?: boolean
+          settings_json?: Json | null
+          sort_order?: number
+          text?: string
+          type?: Database["public"]["Enums"]["question_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      score_tiers: {
+        Row: {
+          assessment_id: string
+          colour: string
+          description: string | null
+          id: string
+          label: string
+          max_pct: number
+          min_pct: number
+          sort_order: number
+        }
+        Insert: {
+          assessment_id: string
+          colour?: string
+          description?: string | null
+          id?: string
+          label: string
+          max_pct?: number
+          min_pct?: number
+          sort_order?: number
+        }
+        Update: {
+          assessment_id?: string
+          colour?: string
+          description?: string | null
+          id?: string
+          label?: string
+          max_pct?: number
+          min_pct?: number
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "score_tiers_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_invitations: {
         Row: {
           accepted_at: string | null
@@ -135,6 +347,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assessment_org_id: { Args: { _assessment_id: string }; Returns: string }
       get_user_org_id: { Args: never; Returns: string }
       get_user_role: {
         Args: never
@@ -142,9 +355,24 @@ export type Database = {
       }
       is_org_admin: { Args: { _org_id: string }; Returns: boolean }
       is_org_member: { Args: { _org_id: string }; Returns: boolean }
+      question_org_id: { Args: { _question_id: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "editor" | "viewer"
+      assessment_status: "draft" | "published" | "archived"
+      assessment_type:
+        | "scorecard"
+        | "diagnostic"
+        | "readiness_check"
+        | "maturity_model"
+      question_type:
+        | "yes_no"
+        | "multiple_choice"
+        | "sliding_scale"
+        | "rating_scale"
+        | "open_text"
+        | "checkbox_select"
+        | "image_select"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -273,6 +501,22 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "editor", "viewer"],
+      assessment_status: ["draft", "published", "archived"],
+      assessment_type: [
+        "scorecard",
+        "diagnostic",
+        "readiness_check",
+        "maturity_model",
+      ],
+      question_type: [
+        "yes_no",
+        "multiple_choice",
+        "sliding_scale",
+        "rating_scale",
+        "open_text",
+        "checkbox_select",
+        "image_select",
+      ],
     },
   },
 } as const
