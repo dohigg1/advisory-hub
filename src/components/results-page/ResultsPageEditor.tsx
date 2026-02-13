@@ -5,6 +5,7 @@ import type { Assessment, ScoreTier, Category } from "@/types/assessment";
 import type { ResultsPageSection, ResultsSectionType } from "@/types/results-page";
 import { createDefaultResultsSection, RESULTS_SECTION_LABELS, RESULTS_SECTION_DESCRIPTIONS } from "@/types/results-page";
 import { ResultsSectionEditor } from "./ResultsSectionEditor";
+import { ResultsPagePreview } from "./ResultsPagePreview";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -142,12 +143,14 @@ export function ResultsPageEditor({ sections, setSections, onSave, scoreTiers, c
           )}
         </div>
 
-        {/* Preview placeholder */}
-        <div className="flex-1 overflow-y-auto bg-muted/30 flex items-center justify-center p-4">
-          <div className="text-center text-muted-foreground">
-            <p className="text-sm font-medium mb-1">Results Page Preview</p>
-            <p className="text-xs">The results page will be rendered with real data when a respondent completes the assessment.</p>
-          </div>
+        {/* Live preview */}
+        <div className="flex-1 overflow-y-auto">
+          <ResultsPagePreview
+            sections={sections}
+            scoreTiers={scoreTiers}
+            categories={categories}
+            assessment={assessment}
+          />
         </div>
       </div>
     </div>
