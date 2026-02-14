@@ -1,4 +1,4 @@
-import { BarChart3, LayoutDashboard, ClipboardCheck, Users, LineChart, Settings } from "lucide-react";
+import { BarChart3, LayoutDashboard, ClipboardCheck, Users, LineChart, Settings, Gift } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -23,6 +23,7 @@ const mainNav = [
 ];
 
 const secondaryNav = [
+  { title: "Referrals", url: "/referrals", icon: Gift },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 

@@ -274,6 +274,24 @@ export function SettingsTab({ assessment, onUpdate }: Props) {
 
       <Separator />
 
+      {/* AI Narratives */}
+      <Card className="border shadow-sm">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm font-medium">AI Narratives</CardTitle>
+            <Switch
+              checked={settings.ai_narratives_enabled ?? false}
+              onCheckedChange={v => updateSettings({ ai_narratives_enabled: v })}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Generate personalised AI-written summaries, strengths, and recommendations on each respondent's results page
+          </p>
+        </CardHeader>
+      </Card>
+
+      <Separator />
+
       {/* Behaviour */}
       <Card className="border shadow-sm">
         <CardHeader>
