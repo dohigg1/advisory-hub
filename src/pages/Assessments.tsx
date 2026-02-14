@@ -11,13 +11,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, ClipboardCheck, MoreVertical, Trash2, ArrowUpRight, LayoutTemplate } from "lucide-react";
+import { Plus, ClipboardCheck, MoreVertical, Trash2, ArrowUpRight, LayoutTemplate, Sparkles } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { Assessment, AssessmentType } from "@/types/assessment";
 import { ASSESSMENT_TYPE_LABELS, DEFAULT_SCORE_TIERS } from "@/types/assessment";
 import { motion } from "framer-motion";
 import { TemplateGallery } from "@/components/templates/TemplateGallery";
 import type { TemplateFixture } from "@/data/templates";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 
 const STATUS_STYLES: Record<string, string> = {
   draft: "bg-muted text-muted-foreground border-0",
@@ -31,6 +32,7 @@ const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transiti
 const Assessments = () => {
   const { organisation } = useAuth();
   const navigate = useNavigate();
+  const { canCreate, usage } = usePlanLimits();
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
@@ -57,6 +59,10 @@ const Assessments = () => {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!organisation) return;
+    if (!canCreate("assessments")) {
+      toast.error(`You've reached your plan limit of ${usage.assessments.limit} assessments. Please upgrade to create more.`);
+      return;
+    }
     setCreating(true);
 
     const { data, error } = await supabase
@@ -104,6 +110,10 @@ const Assessments = () => {
 
   const handleUseTemplate = async (template: TemplateFixture) => {
     if (!organisation) return;
+    if (!canCreate("assessments")) {
+      toast.error(`You've reached your plan limit of ${usage.assessments.limit} assessments. Please upgrade to create more.`);
+      return;
+    }
     setTemplateLoading(true);
 
     try {
@@ -245,6 +255,9 @@ const Assessments = () => {
           <p className="text-[13px] text-muted-foreground mt-0.5">Create and manage client assessments</p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" className="gap-2 shadow-soft-sm h-9 text-[13px]" onClick={() => navigate("/assessments/generate")}>
+            <Sparkles className="h-4 w-4" /> AI Generate
+          </Button>
           <Button variant="outline" className="gap-2 shadow-soft-sm h-9 text-[13px]" onClick={() => setShowTemplates(true)}>
             <LayoutTemplate className="h-4 w-4" /> Templates
           </Button>

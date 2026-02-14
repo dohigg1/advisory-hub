@@ -14,11 +14,13 @@ import Leads from "./pages/Leads";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import AssessmentBuilder from "./pages/AssessmentBuilder";
+import AIGenerateAssessment from "./pages/AIGenerateAssessment";
 import NotFound from "./pages/NotFound";
 import PublicLandingPage from "./pages/PublicLandingPage";
 import PublicAssessment from "./pages/PublicAssessment";
 import PublicResults from "./pages/PublicResults";
 import Portal from "./pages/Portal";
+import Referrals from "./pages/Referrals";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +38,7 @@ const App = () => (
             <Route path="/results/:leadId" element={<PublicResults />} />
             <Route path="/portal/:orgSlug" element={<Portal />} />
             <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/assessments/generate" element={<ProtectedRoute><AIGenerateAssessment /></ProtectedRoute>} />
             <Route path="/assessments/:id" element={<ProtectedRoute><AssessmentBuilder /></ProtectedRoute>} />
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
               <Route path="/" element={<Dashboard />} />
@@ -43,6 +46,7 @@ const App = () => (
               <Route path="/leads" element={<Leads />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/referrals" element={<Referrals />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
