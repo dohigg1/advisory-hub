@@ -19,6 +19,7 @@ import { motion } from "framer-motion";
 import { TemplateGallery } from "@/components/templates/TemplateGallery";
 import type { TemplateFixture } from "@/data/templates";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { trackEvent, AnalyticsEvents } from "@/lib/posthog";
 
 const STATUS_STYLES: Record<string, string> = {
   draft: "bg-muted text-muted-foreground border-0",
@@ -101,6 +102,7 @@ const Assessments = () => {
     }));
     await supabase.from("score_tiers").insert(tiersToInsert);
 
+    trackEvent(AnalyticsEvents.ASSESSMENT_CREATED, { type, title: title.trim() });
     toast.success("Assessment created");
     setCreateOpen(false);
     setTitle("");
@@ -217,6 +219,7 @@ const Assessments = () => {
         .insert(tiersToInsert);
       if (tErr) throw new Error(tErr.message);
 
+      trackEvent(AnalyticsEvents.TEMPLATE_USED, { template: template.title });
       toast.success(`"${template.title}" created from template`);
       navigate(`/assessments/${assessmentId}`);
     } catch (err: any) {

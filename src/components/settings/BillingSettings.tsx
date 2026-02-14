@@ -13,6 +13,8 @@ import { Check, X, ExternalLink, CreditCard, AlertTriangle } from "lucide-react"
 import { PLAN_CONFIGS, PLAN_TIERS, FEATURE_LABELS, type PlanTier } from "@/config/plans";
 import { motion } from "framer-motion";
 import type { Tables } from "@/integrations/supabase/types";
+import { CancellationModal } from "./CancellationModal";
+import { trackEvent, AnalyticsEvents } from "@/lib/posthog";
 
 type Invoice = Tables<"invoices">;
 
@@ -24,6 +26,7 @@ export function BillingSettings() {
   const [managingPortal, setManagingPortal] = useState(false);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [invoicesLoaded, setInvoicesLoaded] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
 
   const loadInvoices = async () => {
     if (!organisation || invoicesLoaded) return;
@@ -292,6 +295,30 @@ export function BillingSettings() {
           )}
         </CardContent>
       </Card>
+      {/* Cancel subscription button for paid plans */}
+      {planLimits.subscribed && planLimits.tier !== "free" && (
+        <Card className="shadow-soft-sm border-destructive/20">
+          <CardContent className="flex items-center justify-between py-4">
+            <div>
+              <p className="text-[13px] font-semibold">Cancel Subscription</p>
+              <p className="text-[12px] text-muted-foreground">Your plan will remain active until the end of the billing period.</p>
+            </div>
+            <Button variant="outline" size="sm" className="text-destructive border-destructive/30 hover:bg-destructive/5" onClick={() => setCancelOpen(true)}>
+              Cancel Plan
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      <CancellationModal
+        open={cancelOpen}
+        onOpenChange={setCancelOpen}
+        onConfirmCancel={() => {
+          trackEvent(AnalyticsEvents.PLAN_CANCELLED, { tier: planLimits.tier });
+          handleManageSubscription();
+          setCancelOpen(false);
+        }}
+      />
     </div>
   );
 }

@@ -61,7 +61,7 @@ export function CancellationModal({ open, onOpenChange, onConfirmCancel }: Props
       org_id: organisation?.id,
       user_id: user?.id,
       reason,
-      reason_detail: detail || null,
+      details: detail || null,
       offered_discount: true,
       accepted_discount: true,
     } as any);
@@ -81,7 +81,7 @@ export function CancellationModal({ open, onOpenChange, onConfirmCancel }: Props
         org_id: organisation?.id,
         user_id: user?.id,
         reason,
-        reason_detail: detail || null,
+        details: detail || null,
         offered_discount: reason === "too_expensive",
         accepted_discount: false,
       } as any);

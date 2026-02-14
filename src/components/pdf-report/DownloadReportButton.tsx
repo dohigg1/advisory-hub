@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { ResultsData } from "@/pages/PublicResults";
 import type { ReportThemeId } from "./themes";
 import { ReportDocument } from "./ReportDocument";
+import { trackEvent, AnalyticsEvents } from "@/lib/posthog";
 
 interface Props {
   data: ResultsData;
@@ -23,11 +24,13 @@ export function DownloadReportButton({ data, themeId, commentary: externalCommen
     try {
       const { data: row } = await supabase
         .from("lead_commentary" as any)
-        .select("content_md, author_id")
+        .select("content, author_id")
         .eq("lead_id", data.lead.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
 
-      if (!row || !(row as any).content_md) return null;
+      if (!row || !(row as any).content) return null;
 
       // Fetch author name
       let authorName: string | undefined;
@@ -35,14 +38,14 @@ export function DownloadReportButton({ data, themeId, commentary: externalCommen
         const { data: profile } = await supabase
           .from("profiles")
           .select("full_name")
-          .eq("auth_user_id", (row as any).author_id)
+          .eq("id", (row as any).author_id)
           .maybeSingle();
         if (profile?.full_name) {
           authorName = profile.full_name;
         }
       }
 
-      return { content: (row as any).content_md, authorName };
+      return { content: (row as any).content, authorName };
     } catch {
       return null;
     }
@@ -64,6 +67,7 @@ export function DownloadReportButton({ data, themeId, commentary: externalCommen
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      trackEvent(AnalyticsEvents.REPORT_DOWNLOADED, { assessment: data.assessment.title });
     } catch (err) {
       console.error("PDF generation error:", err);
     } finally {

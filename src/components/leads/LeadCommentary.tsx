@@ -28,11 +28,13 @@ export function LeadCommentary({ leadId }: Props) {
       .from("lead_commentary" as any)
       .select("*")
       .eq("lead_id", leadId)
+      .order("created_at", { ascending: false })
+      .limit(1)
       .maybeSingle();
 
     if (data) {
-      setContent((data as any).content_md || "");
-      setSavedContent((data as any).content_md || "");
+      setContent((data as any).content || "");
+      setSavedContent((data as any).content || "");
     }
     setLoading(false);
   };
@@ -41,17 +43,20 @@ export function LeadCommentary({ leadId }: Props) {
     if (!user) return;
     setSaving(true);
 
+    // Get the profile id for author_id
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+
     const { error } = await supabase
       .from("lead_commentary" as any)
-      .upsert(
-        {
-          lead_id: leadId,
-          author_id: user.id,
-          content_md: content,
-          updated_at: new Date().toISOString(),
-        } as any,
-        { onConflict: "lead_id" }
-      );
+      .insert({
+        lead_id: leadId,
+        author_id: profileData?.id,
+        content: content,
+      } as any);
 
     if (error) {
       toast({

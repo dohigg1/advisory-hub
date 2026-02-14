@@ -274,6 +274,38 @@ export function SettingsTab({ assessment, onUpdate }: Props) {
 
       <Separator />
 
+      {/* PDF Report Theme */}
+      <Card className="border shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">PDF Report Theme</CardTitle>
+          <p className="text-xs text-muted-foreground">Choose a visual theme for generated PDF reports</p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { value: "corporate", label: "Corporate", desc: "Navy tones, serif headings" },
+              { value: "modern", label: "Modern", desc: "Clean, bold typography" },
+              { value: "minimal", label: "Minimal", desc: "White space, monochrome" },
+            ].map(theme => (
+              <button
+                key={theme.value}
+                onClick={() => updateSettings({ report_theme: theme.value })}
+                className={`rounded-lg border p-3 text-left transition-all ${
+                  (settings.report_theme ?? "corporate") === theme.value
+                    ? "border-accent bg-accent/5 ring-1 ring-accent/20"
+                    : "border-border/60 hover:border-border"
+                }`}
+              >
+                <p className="text-sm font-medium">{theme.label}</p>
+                <p className="text-xs text-muted-foreground">{theme.desc}</p>
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Separator />
+
       {/* AI Narratives */}
       <Card className="border shadow-sm">
         <CardHeader>
