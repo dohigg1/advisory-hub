@@ -32,7 +32,18 @@ export function ResultsPageTab({ assessment, scoreTiers, categories }: Props) {
 
     if (data) {
       setResultsPageId(data.id);
-      setSections((data.sections_json as any) ?? []);
+      const existingSections = (data.sections_json as any) ?? [];
+      if (existingSections.length > 0) {
+        setSections(existingSections);
+      } else {
+        const defaults = generateDefaultResultsSections(assessment);
+        setSections(defaults);
+        // Persist defaults so they're saved
+        await supabase
+          .from("results_pages")
+          .update({ sections_json: defaults as any })
+          .eq("id", data.id);
+      }
     } else {
       const defaultSections = generateDefaultResultsSections(assessment);
       const { data: created, error: createErr } = await supabase

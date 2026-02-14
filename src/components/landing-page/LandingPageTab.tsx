@@ -32,9 +32,22 @@ export function LandingPageTab({ assessment }: Props) {
     }
 
     if (data) {
+      const existingSections = (data.sections_json as any) ?? [];
+      const sections = existingSections.length > 0
+        ? existingSections
+        : generateDefaultLandingSections(assessment);
+
+      // If sections were empty, persist the generated defaults
+      if (existingSections.length === 0 && sections.length > 0) {
+        await supabase
+          .from("landing_pages")
+          .update({ sections_json: sections as any })
+          .eq("id", data.id);
+      }
+
       setLandingPage({
         ...data,
-        sections_json: (data.sections_json as any) ?? [],
+        sections_json: sections,
         settings_json: (data.settings_json as any) ?? {},
       } as LandingPage);
     } else {
