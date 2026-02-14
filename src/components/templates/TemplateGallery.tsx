@@ -3,10 +3,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, FileText, ArrowLeft, Layers, HelpCircle, BarChart3, Sparkles } from "lucide-react";
+import { Search, FileText, ArrowLeft, Layers, HelpCircle, BarChart3 } from "lucide-react";
 import { TEMPLATE_FIXTURES, TEMPLATE_CATEGORY_LABELS, type TemplateFixture, type TemplateCategory } from "@/data/templates";
+import { TemplatePreviewDialog } from "./TemplatePreviewDialog";
 import { motion } from "framer-motion";
 
 interface Props {
@@ -120,93 +119,12 @@ export function TemplateGallery({ onUseTemplate, onBack, loading }: Props) {
         )}
       </div>
 
-      {/* Preview Dialog */}
-      <Dialog open={!!previewTemplate} onOpenChange={open => !open && setPreviewTemplate(null)}>
-        <DialogContent className="shadow-soft-lg max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
-          {previewTemplate && (
-            <>
-              <DialogHeader className="shrink-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge className={`text-[10px] font-semibold ${CATEGORY_BADGE_STYLES[previewTemplate.category]}`}>
-                    {TEMPLATE_CATEGORY_LABELS[previewTemplate.category]}
-                  </Badge>
-                  <span className="text-[11px] text-muted-foreground">{previewTemplate.question_count} questions · {previewTemplate.template_data_json.categories.length} categories</span>
-                </div>
-                <DialogTitle className="text-lg">{previewTemplate.title}</DialogTitle>
-                <p className="text-[13px] text-muted-foreground mt-1">{previewTemplate.description}</p>
-              </DialogHeader>
-
-              <ScrollArea className="flex-1 min-h-0 -mx-6 px-6">
-                <div className="space-y-5 pb-4">
-                  {/* Categories */}
-                  <div>
-                    <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Categories</h3>
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      {previewTemplate.template_data_json.categories.map((cat, i) => (
-                        <div key={i} className="flex items-start gap-2 p-2 rounded-lg bg-muted/40">
-                          <div className="h-2 w-2 rounded-full mt-1.5 shrink-0" style={{ background: cat.colour }} />
-                          <div>
-                            <p className="text-[12px] font-medium">{cat.name}</p>
-                            <p className="text-[11px] text-muted-foreground">{cat.description}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Score Tiers */}
-                  <div>
-                    <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Score Tiers</h3>
-                    <div className="space-y-1.5">
-                      {previewTemplate.template_data_json.score_tiers.map((tier, i) => (
-                        <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-muted/40">
-                          <div className="h-3 w-3 rounded-full shrink-0" style={{ background: tier.colour }} />
-                          <div className="flex-1 min-w-0">
-                            <span className="text-[12px] font-medium">{tier.label}</span>
-                            <span className="text-[11px] text-muted-foreground ml-2">{tier.min_pct}% – {tier.max_pct}%</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Sample Questions */}
-                  <div>
-                    <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Sample Questions</h3>
-                    <div className="space-y-1.5">
-                      {previewTemplate.template_data_json.questions.slice(0, 6).map((q, i) => (
-                        <div key={i} className="flex items-start gap-2 p-2 rounded-lg bg-muted/40">
-                          <span className="text-[10px] text-muted-foreground/60 mono mt-0.5 shrink-0 w-4 text-right">{i + 1}</span>
-                          <p className="text-[12px]">{q.text}</p>
-                        </div>
-                      ))}
-                      {previewTemplate.template_data_json.questions.length > 6 && (
-                        <p className="text-[11px] text-muted-foreground text-center pt-1">
-                          + {previewTemplate.template_data_json.questions.length - 6} more questions
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </ScrollArea>
-
-              <div className="pt-3 border-t">
-                <Button
-                  className="w-full gap-2 h-10"
-                  onClick={() => {
-                    onUseTemplate(previewTemplate);
-                    setPreviewTemplate(null);
-                  }}
-                  disabled={loading}
-                >
-                  <Sparkles className="h-4 w-4" />
-                  {loading ? "Creating…" : "Use This Template"}
-                </Button>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      <TemplatePreviewDialog
+        template={previewTemplate}
+        onClose={() => setPreviewTemplate(null)}
+        onUseTemplate={onUseTemplate}
+        loading={loading}
+      />
     </>
   );
 }
