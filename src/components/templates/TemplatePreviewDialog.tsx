@@ -51,7 +51,7 @@ export function TemplatePreviewDialog({ template, onClose, onUseTemplate, loadin
 
     return (
       <Dialog open onOpenChange={open => !open && handleClose()}>
-        <DialogContent className="shadow-soft-lg max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
+        <DialogContent className="shadow-soft-lg max-w-lg h-[85vh] flex flex-col overflow-hidden">
           <DialogHeader className="shrink-0">
             <div className="flex items-center justify-between">
               <Badge className={`text-[10px] font-semibold ${CATEGORY_BADGE_STYLES[template.category]}`}>
@@ -153,7 +153,7 @@ export function TemplatePreviewDialog({ template, onClose, onUseTemplate, loadin
 
   return (
     <Dialog open onOpenChange={open => !open && handleClose()}>
-      <DialogContent className="shadow-soft-lg max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
+      <DialogContent className="shadow-soft-lg max-w-2xl h-[85vh] flex flex-col overflow-hidden">
         <DialogHeader className="shrink-0">
           <div className="flex items-center gap-2 mb-1">
             <Badge className={`text-[10px] font-semibold ${CATEGORY_BADGE_STYLES[template.category]}`}>
