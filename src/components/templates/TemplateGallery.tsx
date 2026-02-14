@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, FileText, ArrowLeft, Layers, HelpCircle, BarChart3, Sparkles } from "lucide-react";
-import { TEMPLATE_FIXTURES, TEMPLATE_CATEGORY_LABELS, type TemplateFixture, type TemplateCategory } from "@/data/templates";
+import { Search, FileText, ArrowLeft, Layers, HelpCircle, BarChart3, Sparkles, Lock, Crown } from "lucide-react";
+import { TEMPLATE_CATEGORY_LABELS, type TemplateFixture, type TemplateCategory } from "@/data/templates";
+import { useTemplates, type TemplateWithAccess } from "@/hooks/useTemplates";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { motion } from "framer-motion";
 
 interface Props {
@@ -15,7 +17,7 @@ interface Props {
   loading?: boolean;
 }
 
-const CATEGORY_BADGE_STYLES: Record<TemplateCategory, string> = {
+const CATEGORY_BADGE_STYLES: Record<string, string> = {
   consulting: "bg-accent/10 text-accent border-0",
   accounting: "bg-success/10 text-success border-0",
   advisory: "bg-purple-500/10 text-purple-600 border-0",
@@ -25,16 +27,24 @@ const CATEGORY_BADGE_STYLES: Record<TemplateCategory, string> = {
   operations: "bg-emerald-500/10 text-emerald-600 border-0",
 };
 
+const TIER_LABEL: Record<string, string> = {
+  starter: "Starter",
+  professional: "Professional",
+  firm: "Firm",
+};
+
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.35 } } };
 
 export function TemplateGallery({ onUseTemplate, onBack, loading }: Props) {
+  const { tier } = usePlanLimits();
+  const { templates: allTemplates, loading: templatesLoading } = useTemplates(tier);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<TemplateCategory | "all">("all");
-  const [previewTemplate, setPreviewTemplate] = useState<TemplateFixture | null>(null);
+  const [previewTemplate, setPreviewTemplate] = useState<TemplateWithAccess | null>(null);
 
   const filtered = useMemo(() => {
-    return TEMPLATE_FIXTURES.filter(t => {
+    return allTemplates.filter(t => {
       if (categoryFilter !== "all" && t.category !== categoryFilter) return false;
       if (search) {
         const q = search.toLowerCase();
@@ -42,7 +52,7 @@ export function TemplateGallery({ onUseTemplate, onBack, loading }: Props) {
       }
       return true;
     });
-  }, [search, categoryFilter]);
+  }, [search, categoryFilter, allTemplates]);
 
   return (
     <>
@@ -61,7 +71,7 @@ export function TemplateGallery({ onUseTemplate, onBack, loading }: Props) {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search templates…"
+              placeholder="Search templates..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="pl-9 h-9 text-[13px]"
@@ -82,7 +92,11 @@ export function TemplateGallery({ onUseTemplate, onBack, loading }: Props) {
           </div>
         </div>
 
-        {filtered.length === 0 ? (
+        {templatesLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <FileText className="h-8 w-8 mx-auto mb-2 opacity-40" />
             <p className="text-[13px] font-medium">No templates match your search</p>
@@ -90,27 +104,41 @@ export function TemplateGallery({ onUseTemplate, onBack, loading }: Props) {
         ) : (
           <motion.div variants={container} initial="hidden" animate="show" className="grid gap-4 sm:grid-cols-2">
             {filtered.map((t, i) => (
-              <motion.div key={i} variants={item}>
+              <motion.div key={t.id || i} variants={item}>
                 <Card
-                  className="group cursor-pointer shadow-soft-xs hover:shadow-soft-md transition-all duration-300 border-border/60 hover:border-accent/20 overflow-hidden"
+                  className={`group cursor-pointer shadow-soft-xs hover:shadow-soft-md transition-all duration-300 border-border/60 overflow-hidden ${
+                    t.locked
+                      ? "opacity-75 hover:border-amber-200"
+                      : "hover:border-accent/20"
+                  }`}
                   onClick={() => setPreviewTemplate(t)}
                 >
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <CardTitle className="text-[14px] font-semibold tracking-tight truncate">{t.title}</CardTitle>
+                        <CardTitle className="text-[14px] font-semibold tracking-tight truncate flex items-center gap-1.5">
+                          {t.title}
+                          {t.locked && <Lock className="h-3 w-3 text-amber-500 shrink-0" />}
+                        </CardTitle>
                       </div>
-                      <Badge className={`text-[10px] font-semibold shrink-0 ${CATEGORY_BADGE_STYLES[t.category]}`}>
-                        {TEMPLATE_CATEGORY_LABELS[t.category]}
-                      </Badge>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {t.min_plan_tier && (
+                          <Badge variant="outline" className="text-[9px] border-amber-300 text-amber-600">
+                            {TIER_LABEL[t.min_plan_tier] || t.min_plan_tier}+
+                          </Badge>
+                        )}
+                        <Badge className={`text-[10px] font-semibold shrink-0 ${CATEGORY_BADGE_STYLES[t.category] || ""}`}>
+                          {TEMPLATE_CATEGORY_LABELS[t.category as TemplateCategory] || t.category}
+                        </Badge>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="pb-4 space-y-3">
                     <p className="text-[12px] text-muted-foreground/70 line-clamp-2">{t.description}</p>
                     <div className="flex items-center gap-4 text-[11px] text-muted-foreground/50">
                       <span className="flex items-center gap-1"><HelpCircle className="h-3 w-3" /> {t.question_count} questions</span>
-                      <span className="flex items-center gap-1"><Layers className="h-3 w-3" /> {t.template_data_json.categories.length} categories</span>
-                      <span className="flex items-center gap-1"><BarChart3 className="h-3 w-3" /> {t.template_data_json.score_tiers.length} tiers</span>
+                      <span className="flex items-center gap-1"><Layers className="h-3 w-3" /> {t.template_data_json.categories?.length || 0} categories</span>
+                      <span className="flex items-center gap-1"><BarChart3 className="h-3 w-3" /> {t.template_data_json.score_tiers?.length || 0} tiers</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -127,10 +155,18 @@ export function TemplateGallery({ onUseTemplate, onBack, loading }: Props) {
             <>
               <DialogHeader>
                 <div className="flex items-center gap-2 mb-1">
-                  <Badge className={`text-[10px] font-semibold ${CATEGORY_BADGE_STYLES[previewTemplate.category]}`}>
-                    {TEMPLATE_CATEGORY_LABELS[previewTemplate.category]}
+                  <Badge className={`text-[10px] font-semibold ${CATEGORY_BADGE_STYLES[previewTemplate.category] || ""}`}>
+                    {TEMPLATE_CATEGORY_LABELS[previewTemplate.category as TemplateCategory] || previewTemplate.category}
                   </Badge>
-                  <span className="text-[11px] text-muted-foreground">{previewTemplate.question_count} questions · {previewTemplate.template_data_json.categories.length} categories</span>
+                  <span className="text-[11px] text-muted-foreground">
+                    {previewTemplate.question_count} questions · {previewTemplate.template_data_json.categories?.length || 0} categories
+                  </span>
+                  {previewTemplate.min_plan_tier && (
+                    <Badge variant="outline" className="text-[9px] border-amber-300 text-amber-600 gap-0.5">
+                      <Crown className="h-2.5 w-2.5" />
+                      {TIER_LABEL[previewTemplate.min_plan_tier] || previewTemplate.min_plan_tier}+
+                    </Badge>
+                  )}
                 </div>
                 <DialogTitle className="text-lg">{previewTemplate.title}</DialogTitle>
                 <p className="text-[13px] text-muted-foreground mt-1">{previewTemplate.description}</p>
@@ -139,69 +175,88 @@ export function TemplateGallery({ onUseTemplate, onBack, loading }: Props) {
               <ScrollArea className="flex-1 -mx-6 px-6">
                 <div className="space-y-5 pb-4">
                   {/* Categories */}
-                  <div>
-                    <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Categories</h3>
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      {previewTemplate.template_data_json.categories.map((cat, i) => (
-                        <div key={i} className="flex items-start gap-2 p-2 rounded-lg bg-muted/40">
-                          <div className="h-2 w-2 rounded-full mt-1.5 shrink-0" style={{ background: cat.colour }} />
-                          <div>
-                            <p className="text-[12px] font-medium">{cat.name}</p>
-                            <p className="text-[11px] text-muted-foreground">{cat.description}</p>
+                  {previewTemplate.template_data_json.categories && (
+                    <div>
+                      <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Categories</h3>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {previewTemplate.template_data_json.categories.map((cat: any, i: number) => (
+                          <div key={i} className="flex items-start gap-2 p-2 rounded-lg bg-muted/40">
+                            <div className="h-2 w-2 rounded-full mt-1.5 shrink-0" style={{ background: cat.colour }} />
+                            <div>
+                              <p className="text-[12px] font-medium">{cat.name}</p>
+                              <p className="text-[11px] text-muted-foreground">{cat.description}</p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Score Tiers */}
-                  <div>
-                    <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Score Tiers</h3>
-                    <div className="space-y-1.5">
-                      {previewTemplate.template_data_json.score_tiers.map((tier, i) => (
-                        <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-muted/40">
-                          <div className="h-3 w-3 rounded-full shrink-0" style={{ background: tier.colour }} />
-                          <div className="flex-1 min-w-0">
-                            <span className="text-[12px] font-medium">{tier.label}</span>
-                            <span className="text-[11px] text-muted-foreground ml-2">{tier.min_pct}% – {tier.max_pct}%</span>
+                  {previewTemplate.template_data_json.score_tiers && (
+                    <div>
+                      <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Score Tiers</h3>
+                      <div className="space-y-1.5">
+                        {previewTemplate.template_data_json.score_tiers.map((t: any, i: number) => (
+                          <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-muted/40">
+                            <div className="h-3 w-3 rounded-full shrink-0" style={{ background: t.colour }} />
+                            <div className="flex-1 min-w-0">
+                              <span className="text-[12px] font-medium">{t.label}</span>
+                              <span className="text-[11px] text-muted-foreground ml-2">{t.min_pct}% - {t.max_pct}%</span>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Sample Questions */}
-                  <div>
-                    <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Sample Questions</h3>
-                    <div className="space-y-1.5">
-                      {previewTemplate.template_data_json.questions.slice(0, 6).map((q, i) => (
-                        <div key={i} className="flex items-start gap-2 p-2 rounded-lg bg-muted/40">
-                          <span className="text-[10px] text-muted-foreground/60 mono mt-0.5 shrink-0 w-4 text-right">{i + 1}</span>
-                          <p className="text-[12px]">{q.text}</p>
-                        </div>
-                      ))}
-                      {previewTemplate.template_data_json.questions.length > 6 && (
-                        <p className="text-[11px] text-muted-foreground text-center pt-1">
-                          + {previewTemplate.template_data_json.questions.length - 6} more questions
-                        </p>
-                      )}
+                  {previewTemplate.template_data_json.questions && (
+                    <div>
+                      <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Sample Questions</h3>
+                      <div className="space-y-1.5">
+                        {previewTemplate.template_data_json.questions.slice(0, 6).map((q: any, i: number) => (
+                          <div key={i} className="flex items-start gap-2 p-2 rounded-lg bg-muted/40">
+                            <span className="text-[10px] text-muted-foreground/60 mono mt-0.5 shrink-0 w-4 text-right">{i + 1}</span>
+                            <p className="text-[12px]">{q.text}</p>
+                          </div>
+                        ))}
+                        {previewTemplate.template_data_json.questions.length > 6 && (
+                          <p className="text-[11px] text-muted-foreground text-center pt-1">
+                            + {previewTemplate.template_data_json.questions.length - 6} more questions
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </ScrollArea>
 
               <div className="pt-3 border-t">
-                <Button
-                  className="w-full gap-2 h-10"
-                  onClick={() => {
-                    onUseTemplate(previewTemplate);
-                    setPreviewTemplate(null);
-                  }}
-                  disabled={loading}
-                >
-                  <Sparkles className="h-4 w-4" />
-                  {loading ? "Creating…" : "Use This Template"}
-                </Button>
+                {previewTemplate.locked ? (
+                  <div className="text-center py-2">
+                    <p className="text-[12px] text-amber-600 font-medium mb-2 flex items-center justify-center gap-1.5">
+                      <Lock className="h-3.5 w-3.5" />
+                      Requires {TIER_LABEL[previewTemplate.min_plan_tier!] || previewTemplate.min_plan_tier} plan or higher
+                    </p>
+                    <Button variant="outline" className="w-full gap-2 h-10 border-amber-300 text-amber-700 hover:bg-amber-50">
+                      <Crown className="h-4 w-4" />
+                      Upgrade to Unlock
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    className="w-full gap-2 h-10"
+                    onClick={() => {
+                      onUseTemplate(previewTemplate);
+                      setPreviewTemplate(null);
+                    }}
+                    disabled={loading}
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    {loading ? "Creating..." : "Use This Template"}
+                  </Button>
+                )}
               </div>
             </>
           )}

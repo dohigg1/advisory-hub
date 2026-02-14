@@ -3,9 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, LayoutTemplate, ArrowRight, Sparkles, Filter } from "lucide-react";
-import { TEMPLATE_FIXTURES, TEMPLATE_CATEGORY_LABELS } from "@/data/templates";
+import { Search, LayoutTemplate, ArrowRight, Sparkles, Filter, Lock, Crown } from "lucide-react";
+import { TEMPLATE_CATEGORY_LABELS } from "@/data/templates";
 import type { TemplateCategory } from "@/data/templates";
+import { useTemplates } from "@/hooks/useTemplates";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { PLAN_CONFIGS } from "@/config/plans";
 import { motion } from "framer-motion";
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
@@ -42,12 +45,20 @@ const CATEGORY_COLORS: Record<string, string> = {
   compliance: "bg-orange-50 text-orange-700 border-orange-200",
 };
 
+const TIER_LABEL: Record<string, string> = {
+  starter: "Starter",
+  professional: "Professional",
+  firm: "Firm",
+};
+
 const TemplateMarketplace = () => {
+  const { tier } = usePlanLimits();
+  const { templates: allTemplates, loading: templatesLoading } = useTemplates(tier);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<FilterCategory>("all");
 
   const filtered = useMemo(() => {
-    return TEMPLATE_FIXTURES.filter((t) => {
+    return allTemplates.filter((t) => {
       if (activeCategory !== "all" && t.category !== activeCategory) return false;
       if (search) {
         const q = search.toLowerCase();
@@ -59,7 +70,19 @@ const TemplateMarketplace = () => {
       }
       return true;
     });
-  }, [search, activeCategory]);
+  }, [search, activeCategory, allTemplates]);
+
+  // Sort: featured first, then by sort_order
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      if (a.featured && !b.featured) return -1;
+      if (!a.featured && b.featured) return 1;
+      // Unlocked before locked
+      if (!a.locked && b.locked) return -1;
+      if (a.locked && !b.locked) return 1;
+      return a.sort_order - b.sort_order;
+    });
+  }, [filtered]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
@@ -161,8 +184,8 @@ const TemplateMarketplace = () => {
           className="text-[13px] text-muted-foreground mb-6"
         >
           Showing{" "}
-          <span className="font-semibold text-foreground">{filtered.length}</span>{" "}
-          template{filtered.length !== 1 ? "s" : ""}
+          <span className="font-semibold text-foreground">{sorted.length}</span>{" "}
+          template{sorted.length !== 1 ? "s" : ""}
           {activeCategory !== "all" && (
             <>
               {" "}
@@ -174,8 +197,15 @@ const TemplateMarketplace = () => {
           )}
         </motion.p>
 
-        {/* Template Grid */}
-        {filtered.length === 0 ? (
+        {/* Loading */}
+        {templatesLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="flex flex-col items-center gap-3">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+              <span className="text-sm text-muted-foreground">Loading templates...</span>
+            </div>
+          </div>
+        ) : sorted.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -200,9 +230,36 @@ const TemplateMarketplace = () => {
             animate="show"
             className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
           >
-            {filtered.map((template, index) => (
-              <motion.div key={`${template.title}-${index}`} variants={item}>
-                <Card className="group relative overflow-hidden shadow-soft-sm hover:shadow-soft-md transition-all duration-300 border-border/60 hover:border-indigo-200 h-full flex flex-col">
+            {sorted.map((template, index) => (
+              <motion.div key={template.id || `${template.title}-${index}`} variants={item}>
+                <Card
+                  className={`group relative overflow-hidden shadow-soft-sm hover:shadow-soft-md transition-all duration-300 border-border/60 h-full flex flex-col ${
+                    template.locked
+                      ? "opacity-80 hover:border-amber-200"
+                      : template.featured
+                      ? "hover:border-indigo-200 ring-1 ring-indigo-100"
+                      : "hover:border-indigo-200"
+                  }`}
+                >
+                  {/* Featured badge */}
+                  {template.featured && !template.locked && (
+                    <div className="absolute top-0 right-0">
+                      <div className="bg-indigo-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wider">
+                        Featured
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Locked overlay */}
+                  {template.locked && (
+                    <div className="absolute top-0 right-0">
+                      <div className="bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wider flex items-center gap-1">
+                        <Crown className="h-2.5 w-2.5" />
+                        {TIER_LABEL[template.min_plan_tier!] || template.min_plan_tier}+
+                      </div>
+                    </div>
+                  )}
+
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between gap-2 mb-1">
                       <Badge
@@ -229,16 +286,27 @@ const TemplateMarketplace = () => {
                       <div className="flex items-center gap-1.5">
                         <Sparkles className="h-3 w-3 text-amber-500" />
                         <span className="text-[11px] text-muted-foreground/60 font-medium">
-                          {template.template_data_json.type.replace(/_/g, " ")}
+                          {template.template_data_json.type?.replace(/_/g, " ") || "assessment"}
                         </span>
                       </div>
-                      <Button
-                        size="sm"
-                        className="h-8 text-[12px] gap-1.5 bg-indigo-600 hover:bg-indigo-700 shadow-soft-sm"
-                      >
-                        Use Template
-                        <ArrowRight className="h-3 w-3" />
-                      </Button>
+                      {template.locked ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 text-[12px] gap-1.5 border-amber-300 text-amber-700 hover:bg-amber-50"
+                        >
+                          <Lock className="h-3 w-3" />
+                          Upgrade to Unlock
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          className="h-8 text-[12px] gap-1.5 bg-indigo-600 hover:bg-indigo-700 shadow-soft-sm"
+                        >
+                          Use Template
+                          <ArrowRight className="h-3 w-3" />
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

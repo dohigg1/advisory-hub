@@ -62,6 +62,17 @@ serve(async (req) => {
         return await handleGetAuditLog(supabaseAdmin, params);
       case "platform_stats":
         return await handlePlatformStats(supabaseAdmin);
+      // Template management
+      case "list_templates":
+        return await handleListTemplates(supabaseAdmin, params);
+      case "create_template":
+        return await handleCreateTemplate(supabaseAdmin, user.id, params);
+      case "update_template":
+        return await handleUpdateTemplate(supabaseAdmin, user.id, params);
+      case "delete_template":
+        return await handleDeleteTemplate(supabaseAdmin, user.id, params);
+      case "seed_templates":
+        return await handleSeedTemplates(supabaseAdmin, user.id, params);
       default:
         return jsonResponse({ error: `Unknown action: ${action}` }, 400);
     }
@@ -332,4 +343,200 @@ async function handlePlatformStats(sb: ReturnType<typeof createClient>) {
     total_completed_leads: leadsRes.count ?? 0,
     tier_breakdown: tierBreakdown,
   });
+}
+
+// ─── list_templates ──────────────────────────────────────────
+async function handleListTemplates(
+  sb: ReturnType<typeof createClient>,
+  params: { include_inactive?: boolean }
+) {
+  let query = sb
+    .from("templates")
+    .select("*")
+    .order("sort_order", { ascending: true })
+    .order("created_at", { ascending: false });
+
+  if (!params.include_inactive) {
+    query = query.eq("is_active", true);
+  }
+
+  const { data, error } = await query;
+  if (error) return jsonResponse({ error: error.message }, 500);
+
+  return jsonResponse({ templates: data ?? [] });
+}
+
+// ─── create_template ─────────────────────────────────────────
+async function handleCreateTemplate(
+  sb: ReturnType<typeof createClient>,
+  adminUserId: string,
+  params: {
+    title: string;
+    description?: string;
+    category?: string;
+    question_count?: number;
+    template_data_json?: Record<string, unknown>;
+    min_plan_tier?: string | null;
+    sort_order?: number;
+    featured?: boolean;
+    is_active?: boolean;
+  }
+) {
+  if (!params.title) return jsonResponse({ error: "title required" }, 400);
+
+  if (params.min_plan_tier && !VALID_TIERS.includes(params.min_plan_tier)) {
+    return jsonResponse({ error: "Invalid min_plan_tier" }, 400);
+  }
+
+  const { data, error } = await sb
+    .from("templates")
+    .insert({
+      title: params.title,
+      description: params.description ?? null,
+      category: params.category ?? "consulting",
+      question_count: params.question_count ?? 0,
+      template_data_json: params.template_data_json ?? {},
+      min_plan_tier: params.min_plan_tier ?? null,
+      sort_order: params.sort_order ?? 0,
+      featured: params.featured ?? false,
+      is_active: params.is_active ?? true,
+    })
+    .select()
+    .single();
+
+  if (error) return jsonResponse({ error: error.message }, 500);
+
+  await sb.from("admin_audit_log").insert({
+    admin_user_id: adminUserId,
+    action: "create_template",
+    details: { template_id: data.id, title: params.title },
+  });
+
+  return jsonResponse({ template: data });
+}
+
+// ─── update_template ─────────────────────────────────────────
+async function handleUpdateTemplate(
+  sb: ReturnType<typeof createClient>,
+  adminUserId: string,
+  params: {
+    id: string;
+    title?: string;
+    description?: string;
+    category?: string;
+    question_count?: number;
+    template_data_json?: Record<string, unknown>;
+    min_plan_tier?: string | null;
+    sort_order?: number;
+    featured?: boolean;
+    is_active?: boolean;
+  }
+) {
+  if (!params.id) return jsonResponse({ error: "id required" }, 400);
+
+  if (params.min_plan_tier !== undefined && params.min_plan_tier !== null && !VALID_TIERS.includes(params.min_plan_tier)) {
+    return jsonResponse({ error: "Invalid min_plan_tier" }, 400);
+  }
+
+  const updateData: Record<string, unknown> = {};
+  if (params.title !== undefined) updateData.title = params.title;
+  if (params.description !== undefined) updateData.description = params.description;
+  if (params.category !== undefined) updateData.category = params.category;
+  if (params.question_count !== undefined) updateData.question_count = params.question_count;
+  if (params.template_data_json !== undefined) updateData.template_data_json = params.template_data_json;
+  if (params.min_plan_tier !== undefined) updateData.min_plan_tier = params.min_plan_tier;
+  if (params.sort_order !== undefined) updateData.sort_order = params.sort_order;
+  if (params.featured !== undefined) updateData.featured = params.featured;
+  if (params.is_active !== undefined) updateData.is_active = params.is_active;
+
+  const { data, error } = await sb
+    .from("templates")
+    .update(updateData)
+    .eq("id", params.id)
+    .select()
+    .single();
+
+  if (error) return jsonResponse({ error: error.message }, 500);
+
+  await sb.from("admin_audit_log").insert({
+    admin_user_id: adminUserId,
+    action: "update_template",
+    details: { template_id: params.id, changes: Object.keys(updateData) },
+  });
+
+  return jsonResponse({ template: data });
+}
+
+// ─── delete_template ─────────────────────────────────────────
+async function handleDeleteTemplate(
+  sb: ReturnType<typeof createClient>,
+  adminUserId: string,
+  params: { id: string }
+) {
+  if (!params.id) return jsonResponse({ error: "id required" }, 400);
+
+  const { error } = await sb
+    .from("templates")
+    .delete()
+    .eq("id", params.id);
+
+  if (error) return jsonResponse({ error: error.message }, 500);
+
+  await sb.from("admin_audit_log").insert({
+    admin_user_id: adminUserId,
+    action: "delete_template",
+    details: { template_id: params.id },
+  });
+
+  return jsonResponse({ success: true });
+}
+
+// ─── seed_templates ──────────────────────────────────────────
+// Bulk upsert templates from the fixture data sent by the admin UI
+async function handleSeedTemplates(
+  sb: ReturnType<typeof createClient>,
+  adminUserId: string,
+  params: {
+    templates: Array<{
+      title: string;
+      description?: string;
+      category?: string;
+      question_count?: number;
+      template_data_json?: Record<string, unknown>;
+      min_plan_tier?: string | null;
+      sort_order?: number;
+      featured?: boolean;
+    }>;
+  }
+) {
+  if (!Array.isArray(params.templates) || params.templates.length === 0) {
+    return jsonResponse({ error: "templates array required" }, 400);
+  }
+
+  const rows = params.templates.map((t, idx) => ({
+    title: t.title,
+    description: t.description ?? null,
+    category: t.category ?? "consulting",
+    question_count: t.question_count ?? 0,
+    template_data_json: t.template_data_json ?? {},
+    min_plan_tier: t.min_plan_tier ?? null,
+    sort_order: t.sort_order ?? idx,
+    featured: t.featured ?? false,
+    is_active: true,
+  }));
+
+  const { data, error } = await sb
+    .from("templates")
+    .insert(rows)
+    .select();
+
+  if (error) return jsonResponse({ error: error.message }, 500);
+
+  await sb.from("admin_audit_log").insert({
+    admin_user_id: adminUserId,
+    action: "seed_templates",
+    details: { count: rows.length },
+  });
+
+  return jsonResponse({ success: true, count: (data ?? []).length });
 }

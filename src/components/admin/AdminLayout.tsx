@@ -13,6 +13,7 @@ import {
   LogOut,
   ArrowLeft,
   ClipboardList,
+  LayoutTemplate,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +21,7 @@ const adminNav = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard, end: true },
   { title: "Organisations", url: "/admin/organisations", icon: Building2 },
   { title: "Feature Flags", url: "/admin/feature-flags", icon: ToggleRight },
+  { title: "Templates", url: "/admin/templates", icon: LayoutTemplate },
   { title: "Legal Content", url: "/admin/legal", icon: FileText },
   { title: "Audit Log", url: "/admin/audit-log", icon: ClipboardList },
 ];

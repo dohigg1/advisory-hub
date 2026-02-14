@@ -1451,10 +1451,13 @@ export type Database = {
           category: string
           created_at: string
           description: string | null
+          featured: boolean
           id: string
           is_active: boolean
+          min_plan_tier: string | null
           preview_image_url: string | null
           question_count: number
+          sort_order: number
           template_data_json: Json
           title: string
           updated_at: string
@@ -1463,10 +1466,13 @@ export type Database = {
           category?: string
           created_at?: string
           description?: string | null
+          featured?: boolean
           id?: string
           is_active?: boolean
+          min_plan_tier?: string | null
           preview_image_url?: string | null
           question_count?: number
+          sort_order?: number
           template_data_json?: Json
           title: string
           updated_at?: string
@@ -1475,10 +1481,13 @@ export type Database = {
           category?: string
           created_at?: string
           description?: string | null
+          featured?: boolean
           id?: string
           is_active?: boolean
+          min_plan_tier?: string | null
           preview_image_url?: string | null
           question_count?: number
+          sort_order?: number
           template_data_json?: Json
           title?: string
           updated_at?: string
