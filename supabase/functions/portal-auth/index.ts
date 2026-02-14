@@ -57,6 +57,16 @@ Deno.serve(async (req) => {
         });
       }
 
+      // Generate a random token (always, to prevent timing attacks)
+      const tokenBytes = new Uint8Array(32);
+      crypto.getRandomValues(tokenBytes);
+      const token = Array.from(tokenBytes).map(b => b.toString(16).padStart(2, "0")).join("");
+
+      // Hash token (always, to prevent timing attacks)
+      const encoder = new TextEncoder();
+      const hashBuffer = await crypto.subtle.digest("SHA-256", encoder.encode(token));
+      const tokenHash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+
       // Verify this email has lead records for this org
       const { count } = await supabase
         .from("leads")
@@ -65,22 +75,14 @@ Deno.serve(async (req) => {
         .eq("email", email.toLowerCase());
 
       if (!count || count === 0) {
-        // Don't reveal whether email exists - just say "sent"
+        // Don't reveal whether email exists - add delay to match email-sending path timing
+        await new Promise(r => setTimeout(r, 200 + Math.random() * 150));
         return new Response(JSON.stringify({ success: true }), {
           status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      // Generate a random token
-      const tokenBytes = new Uint8Array(32);
-      crypto.getRandomValues(tokenBytes);
-      const token = Array.from(tokenBytes).map(b => b.toString(16).padStart(2, "0")).join("");
-
-      // Hash token for storage
-      const encoder = new TextEncoder();
-      const hashBuffer = await crypto.subtle.digest("SHA-256", encoder.encode(token));
-      const tokenHash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
-
+      // Token and hash already generated above
       // Store session
       await supabase.from("portal_sessions").insert({
         org_id: org.id,
