@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import type { Assessment, ScoreTier, Category } from "@/types/assessment";
 import type { ResultsPageSection } from "@/types/results-page";
 import { ResultsPageEditor } from "./ResultsPageEditor";
+import { generateDefaultResultsSections } from "@/lib/generate-default-pages";
 
 interface Props {
   assessment: Assessment;
@@ -33,11 +34,12 @@ export function ResultsPageTab({ assessment, scoreTiers, categories }: Props) {
       setResultsPageId(data.id);
       setSections((data.sections_json as any) ?? []);
     } else {
+      const defaultSections = generateDefaultResultsSections(assessment);
       const { data: created, error: createErr } = await supabase
         .from("results_pages")
         .insert({
           assessment_id: assessment.id,
-          sections_json: [],
+          sections_json: defaultSections as any,
         })
         .select()
         .single();
@@ -46,7 +48,7 @@ export function ResultsPageTab({ assessment, scoreTiers, categories }: Props) {
         toast.error("Failed to create results page");
       } else if (created) {
         setResultsPageId(created.id);
-        setSections([]);
+        setSections((created.sections_json as any) ?? defaultSections);
       }
     }
     setLoading(false);

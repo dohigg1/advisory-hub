@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import type { Assessment } from "@/types/assessment";
 import type { LandingPage, LandingPageSection, LandingPageSettings } from "@/types/landing-page";
 import { LandingPageEditor } from "./LandingPageEditor";
+import { generateDefaultLandingSections } from "@/lib/generate-default-pages";
 
 interface Props {
   assessment: Assessment;
@@ -43,12 +44,13 @@ export function LandingPageTab({ assessment }: Props) {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-|-$/g, "");
 
+      const defaultSections = generateDefaultLandingSections(assessment);
       const { data: created, error: createErr } = await supabase
         .from("landing_pages")
         .insert({
           assessment_id: assessment.id,
           slug: slug || `assessment-${assessment.id.slice(0, 8)}`,
-          sections_json: [],
+          sections_json: defaultSections as any,
           settings_json: {
             button_colour: organisation?.primary_colour || "#1B3A5C",
             heading_font_colour: "#1B3A5C",
