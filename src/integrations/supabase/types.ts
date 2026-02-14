@@ -403,6 +403,47 @@ export type Database = {
           },
         ]
       }
+      cancellation_feedback: {
+        Row: {
+          accepted_discount: boolean | null
+          created_at: string
+          details: string | null
+          id: string
+          offered_discount: boolean | null
+          org_id: string
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          accepted_discount?: boolean | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          offered_discount?: boolean | null
+          org_id: string
+          reason: string
+          user_id: string
+        }
+        Update: {
+          accepted_discount?: boolean | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          offered_discount?: boolean | null
+          org_id?: string
+          reason?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cancellation_feedback_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           assessment_id: string
@@ -488,6 +529,75 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      feature_flag_overrides: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          flag_id: string
+          id: string
+          org_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          flag_id: string
+          id?: string
+          org_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          flag_id?: string
+          id?: string
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feature_flag_overrides_flag_id_fkey"
+            columns: ["flag_id"]
+            isOneToOne: false
+            referencedRelation: "feature_flags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feature_flag_overrides_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feature_flags: {
+        Row: {
+          created_at: string
+          description: string | null
+          enabled: boolean
+          id: string
+          key: string
+          percentage: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          key: string
+          percentage?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          key?: string
+          percentage?: number | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       invoices: {
         Row: {
@@ -584,6 +694,48 @@ export type Database = {
           },
         ]
       }
+      lead_commentary: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          id: string
+          lead_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          id?: string
+          lead_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          lead_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_commentary_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_commentary_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           abandon_email_sent: boolean
@@ -672,6 +824,111 @@ export type Database = {
             columns: ["score_id"]
             isOneToOne: false
             referencedRelation: "scores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legal_acceptances: {
+        Row: {
+          accepted_at: string
+          document_id: string
+          id: string
+          ip_address: string | null
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string
+          document_id: string
+          id?: string
+          ip_address?: string | null
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string
+          document_id?: string
+          id?: string
+          ip_address?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_acceptances_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "legal_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legal_documents: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          published_at: string | null
+          title: string
+          type: string
+          version: number
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          published_at?: string | null
+          title: string
+          type: string
+          version?: number
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          published_at?: string | null
+          title?: string
+          type?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_documents_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "super_admins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_progress: {
+        Row: {
+          completed_at: string
+          completed_by: string | null
+          id: string
+          org_id: string
+          step_key: string
+        }
+        Insert: {
+          completed_at?: string
+          completed_by?: string | null
+          id?: string
+          org_id: string
+          step_key: string
+        }
+        Update: {
+          completed_at?: string
+          completed_by?: string | null
+          id?: string
+          org_id?: string
+          step_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_progress_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
             referencedColumns: ["id"]
           },
         ]

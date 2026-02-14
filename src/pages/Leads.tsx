@@ -7,9 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Search, ChevronDown, ChevronRight, Download, ExternalLink } from "lucide-react";
+import { Users, Search, ChevronDown, ChevronRight, Download, ExternalLink, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
+import { LeadCommentary } from "@/components/leads/LeadCommentary";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 interface Lead {
   id: string;
@@ -42,6 +44,7 @@ const Leads = () => {
   const [expandedEmail, setExpandedEmail] = useState<string | null>(null);
   const [iterations, setIterations] = useState<Record<string, Iteration[]>>({});
   const [iterationCounts, setIterationCounts] = useState<Record<string, number>>({});
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
 
   const fetchLeads = useCallback(async () => {
     if (!organisation) return;
@@ -163,8 +166,9 @@ const Leads = () => {
                   <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">Status</TableHead>
                   <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 text-right">Score</TableHead>
                   <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 text-right">Attempts</TableHead>
-                  <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 text-right">Date</TableHead>
-                </TableRow>
+                   <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 text-right">Date</TableHead>
+                   <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 w-8" />
+                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.map(l => {
@@ -201,10 +205,15 @@ const Leads = () => {
                         <TableCell className="text-right text-[11px] text-muted-foreground/60">
                           {l.completed_at ? format(new Date(l.completed_at), "MMM d, yyyy") : format(new Date(l.created_at), "MMM d")}
                         </TableCell>
+                        <TableCell className="w-8">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); setSelectedLead(l); }}>
+                            <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
+                          </Button>
+                        </TableCell>
                       </TableRow>
                       {isExpanded && iterations[key] && (
                         <TableRow key={`${l.id}-expanded`} className="bg-muted/20">
-                          <TableCell colSpan={7} className="py-3 px-8">
+                          <TableCell colSpan={8} className="py-3 px-8">
                             <div className="space-y-2">
                               <div className="flex items-center justify-between">
                                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Score History</span>
@@ -250,6 +259,28 @@ const Leads = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Lead detail sheet with commentary */}
+      <Sheet open={!!selectedLead} onOpenChange={(open) => !open && setSelectedLead(null)}>
+        <SheetContent className="sm:max-w-lg">
+          <SheetHeader>
+            <SheetTitle className="text-base">
+              {selectedLead ? [selectedLead.first_name, selectedLead.last_name].filter(Boolean).join(" ") || selectedLead.email : "Lead"}
+            </SheetTitle>
+          </SheetHeader>
+          {selectedLead && (
+            <div className="mt-4 space-y-4">
+              <div className="space-y-1 text-sm">
+                <p><span className="text-muted-foreground">Email:</span> {selectedLead.email}</p>
+                {selectedLead.company && <p><span className="text-muted-foreground">Company:</span> {selectedLead.company}</p>}
+                <p><span className="text-muted-foreground">Status:</span> <Badge variant="secondary" className="text-[10px]">{selectedLead.status}</Badge></p>
+                {(() => { const s = Array.isArray(selectedLead.scores) ? selectedLead.scores[0] : selectedLead.scores; return s?.percentage != null ? <p><span className="text-muted-foreground">Score:</span> {s.percentage}%</p> : null; })()}
+              </div>
+              <LeadCommentary leadId={selectedLead.id} />
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </motion.div>
   );
 };
