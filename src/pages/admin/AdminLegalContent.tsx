@@ -84,7 +84,7 @@ const AdminLegalContent = () => {
 
   const fetchDocuments = async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("legal_documents")
       .select("*")
       .order("version", { ascending: false });
@@ -128,14 +128,14 @@ const AdminLegalContent = () => {
     if (formIsCurrent) {
       const currentDoc = existing.find((d) => d.is_current);
       if (currentDoc) {
-        await supabase
+        await (supabase as any)
           .from("legal_documents")
           .update({ is_current: false })
           .eq("id", currentDoc.id);
       }
     }
 
-    const { error } = await supabase.from("legal_documents").insert({
+    const { error } = await (supabase as any).from("legal_documents").insert({
       type: activeTab,
       version: nextVersion,
       title: formTitle.trim(),
@@ -157,7 +157,7 @@ const AdminLegalContent = () => {
   const handleToggleCurrent = async (doc: LegalDocument) => {
     if (doc.is_current) {
       // Unmark
-      await supabase
+      await (supabase as any)
         .from("legal_documents")
         .update({ is_current: false })
         .eq("id", doc.id);
@@ -165,12 +165,12 @@ const AdminLegalContent = () => {
       // Unmark the current one for this type, then mark this one
       const existing = docsForType(doc.type).find((d) => d.is_current);
       if (existing) {
-        await supabase
+        await (supabase as any)
           .from("legal_documents")
           .update({ is_current: false })
           .eq("id", existing.id);
       }
-      await supabase
+      await (supabase as any)
         .from("legal_documents")
         .update({ is_current: true })
         .eq("id", doc.id);

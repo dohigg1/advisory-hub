@@ -115,7 +115,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="px-4 pb-4 space-y-3">
-        {profile?.is_super_admin && (
+        {(profile as any)?.is_super_admin && (
           <a
             href="/admin"
             className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-amber-400/70 hover:bg-amber-500/10 hover:text-amber-400 transition-all duration-200 w-full"

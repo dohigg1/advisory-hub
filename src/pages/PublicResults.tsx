@@ -16,7 +16,6 @@ import { ConsultantInfoSection } from "@/components/results-page/sections/Consul
 import { ProgressComparisonSection } from "@/components/results-page/sections/ProgressComparisonSection";
 import { ShareButtons } from "@/components/results-page/sections/ShareButtons";
 import { AiNarrativeSection } from "@/components/results-page/sections/AiNarrativeSection";
-import { AINarrativeSection } from "@/components/results-page/sections/AINarrativeSection";
 import { PoweredByBadge } from "@/components/PoweredByBadge";
 import { DownloadReportButton } from "@/components/pdf-report/DownloadReportButton";
 import type { ReportThemeId } from "@/components/pdf-report/themes";
@@ -243,7 +242,7 @@ export default function PublicResults() {
               case "next_steps": return <NextStepsSection key={key} section={section} data={data} />;
               case "consultant_info": return <ConsultantInfoSection key={key} section={section} data={data} />;
               case "progress_comparison": return <ProgressComparisonSection key={key} section={section} data={data} />;
-              case "ai_narrative": return <AINarrativeSection key={key} section={section} data={data} />;
+              case "ai_narrative": return <AiNarrativeSection key={key} data={data} />;
               default: return null;
             }
           })

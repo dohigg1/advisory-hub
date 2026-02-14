@@ -87,7 +87,7 @@ export function useOnboarding(): UseOnboardingReturn {
     }
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("onboarding_progress")
         .select("step_key, completed_at")
         .eq("org_id", organisation.id);
@@ -124,7 +124,7 @@ export function useOnboarding(): UseOnboardingReturn {
       setCompletedKeys((prev) => ({ ...prev, [stepKey]: now }));
 
       try {
-        const { error } = await supabase.from("onboarding_progress").upsert(
+        const { error } = await (supabase as any).from("onboarding_progress").upsert(
           {
             org_id: organisation.id,
             step_key: stepKey,
