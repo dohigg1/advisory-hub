@@ -78,7 +78,7 @@ const TemplateMarketplace = () => {
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 text-center">
           <div className="absolute top-4 left-4 sm:left-6 lg:left-8">
             <Button variant="ghost" size="sm" className="text-white/70 hover:text-white hover:bg-white/10 gap-1.5" asChild>
-              <Link to="/dashboard">
+              <Link to="/">
                 <Home className="h-4 w-4" />
                 <span className="hidden sm:inline">Dashboard</span>
               </Link>
