@@ -5,6 +5,9 @@ import { PortalSettings } from "@/components/settings/PortalSettings";
 import { ProfileSettings } from "@/components/settings/ProfileSettings";
 import { BillingSettings } from "@/components/settings/BillingSettings";
 import { AuditLogSettings } from "@/components/settings/AuditLogSettings";
+import { BrandingSettings } from "@/components/settings/BrandingSettings";
+import { DeveloperSettings } from "@/components/settings/DeveloperSettings";
+import { PrivacySettings } from "@/components/settings/PrivacySettings";
 import { motion } from "framer-motion";
 import { useSearchParams } from "react-router-dom";
 
@@ -31,6 +34,9 @@ const Settings = () => {
           <TabsTrigger value="team" className="text-[13px] h-8 data-[state=active]:shadow-soft-sm">Team</TabsTrigger>
           <TabsTrigger value="billing" className="text-[13px] h-8 data-[state=active]:shadow-soft-sm">Billing</TabsTrigger>
           <TabsTrigger value="portal" className="text-[13px] h-8 data-[state=active]:shadow-soft-sm">Client Portal</TabsTrigger>
+          <TabsTrigger value="branding" className="text-[13px] h-8 data-[state=active]:shadow-soft-sm">Branding</TabsTrigger>
+          <TabsTrigger value="developer" className="text-[13px] h-8 data-[state=active]:shadow-soft-sm">Developer</TabsTrigger>
+          <TabsTrigger value="privacy" className="text-[13px] h-8 data-[state=active]:shadow-soft-sm">Privacy</TabsTrigger>
           <TabsTrigger value="activity" className="text-[13px] h-8 data-[state=active]:shadow-soft-sm">Activity</TabsTrigger>
         </TabsList>
 
@@ -52,6 +58,18 @@ const Settings = () => {
 
         <TabsContent value="portal">
           <PortalSettings />
+        </TabsContent>
+
+        <TabsContent value="branding">
+          <BrandingSettings />
+        </TabsContent>
+
+        <TabsContent value="developer">
+          <DeveloperSettings />
+        </TabsContent>
+
+        <TabsContent value="privacy">
+          <PrivacySettings />
         </TabsContent>
 
         <TabsContent value="activity">

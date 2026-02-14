@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.check-plan-limit]
 verify_jwt = false
+
+[functions.generate-assessment]
+verify_jwt = false

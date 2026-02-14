@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,13 @@ const Auth = () => {
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Capture referral code from URL
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref) localStorage.setItem("referral_code", ref);
+  }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +52,25 @@ const Auth = () => {
     if (error) {
       toast.error(error.message);
     } else {
+      // Track referral conversion
+      const refCode = localStorage.getItem("referral_code");
+      if (refCode) {
+        try {
+          const { data: codeData } = await supabase
+            .from("referral_codes")
+            .select("id")
+            .eq("code", refCode)
+            .single();
+          if (codeData) {
+            await supabase.from("referral_conversions").insert({
+              referral_code_id: codeData.id,
+              referred_email: email,
+              status: "signed_up",
+            });
+          }
+          localStorage.removeItem("referral_code");
+        } catch {} // Silent fail for referral tracking
+      }
       toast.success("Check your email for a verification link.");
       setMode("login");
     }

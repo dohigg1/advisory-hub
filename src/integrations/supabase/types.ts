@@ -63,6 +63,56 @@ export type Database = {
           },
         ]
       }
+      api_keys: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          key_hash: string
+          key_prefix: string
+          last_used_at: string | null
+          name: string
+          org_id: string
+          revoked_at: string | null
+          scopes: string[]
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          key_hash: string
+          key_prefix: string
+          last_used_at?: string | null
+          name: string
+          org_id: string
+          revoked_at?: string | null
+          scopes?: string[]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          key_hash?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          name?: string
+          org_id?: string
+          revoked_at?: string | null
+          scopes?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessment_iterations: {
         Row: {
           assessment_id: string
@@ -291,6 +341,68 @@ export type Database = {
           },
         ]
       }
+      brand_themes: {
+        Row: {
+          accent_colour: string | null
+          background_colour: string | null
+          created_at: string
+          custom_css: string | null
+          favicon_url: string | null
+          font_body: string | null
+          font_heading: string | null
+          id: string
+          logo_dark_url: string | null
+          logo_url: string | null
+          org_id: string
+          primary_colour: string | null
+          secondary_colour: string | null
+          text_colour: string | null
+          updated_at: string
+        }
+        Insert: {
+          accent_colour?: string | null
+          background_colour?: string | null
+          created_at?: string
+          custom_css?: string | null
+          favicon_url?: string | null
+          font_body?: string | null
+          font_heading?: string | null
+          id?: string
+          logo_dark_url?: string | null
+          logo_url?: string | null
+          org_id: string
+          primary_colour?: string | null
+          secondary_colour?: string | null
+          text_colour?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accent_colour?: string | null
+          background_colour?: string | null
+          created_at?: string
+          custom_css?: string | null
+          favicon_url?: string | null
+          font_body?: string | null
+          font_heading?: string | null
+          id?: string
+          logo_dark_url?: string | null
+          logo_url?: string | null
+          org_id?: string
+          primary_colour?: string | null
+          secondary_colour?: string | null
+          text_colour?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_themes_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           assessment_id: string
@@ -335,6 +447,44 @@ export type Database = {
             columns: ["assessment_id"]
             isOneToOne: false
             referencedRelation: "top_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      data_retention_settings: {
+        Row: {
+          anonymize_after_days: number | null
+          auto_delete_leads_days: number | null
+          auto_delete_responses_days: number | null
+          created_at: string
+          id: string
+          org_id: string
+          updated_at: string
+        }
+        Insert: {
+          anonymize_after_days?: number | null
+          auto_delete_leads_days?: number | null
+          auto_delete_responses_days?: number | null
+          created_at?: string
+          id?: string
+          org_id: string
+          updated_at?: string
+        }
+        Update: {
+          anonymize_after_days?: number | null
+          auto_delete_leads_days?: number | null
+          auto_delete_responses_days?: number | null
+          created_at?: string
+          id?: string
+          org_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_retention_settings_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
+            referencedRelation: "organisations"
             referencedColumns: ["id"]
           },
         ]
@@ -788,6 +938,79 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "category_averages"
             referencedColumns: ["category_id"]
+          },
+        ]
+      }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          org_id: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          org_id: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          org_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_codes_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referral_conversions: {
+        Row: {
+          converted_at: string | null
+          created_at: string
+          id: string
+          referral_code_id: string
+          referred_email: string
+          referred_user_id: string | null
+          reward_granted: boolean
+          status: string
+        }
+        Insert: {
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          referral_code_id: string
+          referred_email: string
+          referred_user_id?: string | null
+          reward_granted?: boolean
+          status?: string
+        }
+        Update: {
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          referral_code_id?: string
+          referred_email?: string
+          referred_user_id?: string | null
+          reward_granted?: boolean
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_conversions_referral_code_id_fkey"
+            columns: ["referral_code_id"]
+            isOneToOne: false
+            referencedRelation: "referral_codes"
+            referencedColumns: ["id"]
           },
         ]
       }
