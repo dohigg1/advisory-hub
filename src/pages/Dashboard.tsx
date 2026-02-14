@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useOrgDashboardStats, useTopAssessments, useRecentLeads } from "@/hooks/useAnalytics";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
+import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 
 function pctChange(current: number, previous: number) {
   if (previous === 0) return current > 0 ? { pct: 100, icon: ArrowUp, color: "text-success" } : { pct: 0, icon: Minus, color: "text-muted-foreground" };
@@ -53,6 +54,9 @@ const Dashboard = () => {
           </p>
         </div>
       </motion.div>
+
+      {/* Onboarding Checklist */}
+      <OnboardingChecklist />
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

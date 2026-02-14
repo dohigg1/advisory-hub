@@ -1,19 +1,42 @@
 import { Page, View, Text, StyleSheet } from "@react-pdf/renderer";
 import type { ResultsData } from "@/pages/PublicResults";
-import { pageStyles } from "./shared-styles";
+import type { ReportTheme } from "./themes";
+import { createPageStyles } from "./shared-styles";
 
-const styles = StyleSheet.create({
-  ...pageStyles,
-  heading: { fontSize: 20, fontWeight: 700, color: "#1E293B", marginBottom: 20 },
-  step: { flexDirection: "row", gap: 12, marginBottom: 14 },
-  number: { width: 24, height: 24, borderRadius: 12, backgroundColor: "#1E293B", color: "#FFFFFF", fontSize: 11, fontWeight: 700, textAlign: "center", lineHeight: 24 },
-  stepText: { flex: 1, fontSize: 10, color: "#475569", lineHeight: 1.6, paddingTop: 3 },
-  stepTitle: { fontSize: 11, fontWeight: 600, color: "#1E293B", marginBottom: 2 },
-});
+interface Props {
+  data: ResultsData;
+  theme: ReportTheme;
+}
 
-interface Props { data: ResultsData }
+export function RecommendationsPage({ data, theme }: Props) {
+  const t = theme;
+  const ps = createPageStyles(t);
 
-export function RecommendationsPage({ data }: Props) {
+  const styles = StyleSheet.create({
+    ...ps,
+    heading: {
+      fontSize: t.typography.headingSizes.h1,
+      fontWeight: 700,
+      fontFamily: t.typography.headingFont,
+      color: t.typography.headingColor,
+      marginBottom: 20,
+    },
+    step: { flexDirection: "row", gap: 12, marginBottom: 14 },
+    number: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      backgroundColor: t.typography.headingColor,
+      color: "#FFFFFF",
+      fontSize: 11,
+      fontWeight: 700,
+      textAlign: "center",
+      lineHeight: 24,
+    },
+    stepText: { flex: 1, fontSize: 10, color: t.typography.bodyColor, lineHeight: 1.6, paddingTop: 3 },
+    stepTitle: { fontSize: 11, fontWeight: 600, color: t.typography.headingColor, marginBottom: 2 },
+  });
+
   // Build recommendations from low-scoring categories
   const sorted = [...data.categoryScores].sort((a, b) => a.percentage - b.percentage);
   const recommendations = sorted.map((cs, i) => ({

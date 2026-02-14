@@ -1,4 +1,4 @@
-import { BarChart3, LayoutDashboard, ClipboardCheck, Users, LineChart, Settings, Sun, Moon, Gift, Store, LogOut } from "lucide-react";
+import { BarChart3, LayoutDashboard, ClipboardCheck, Users, LineChart, Settings, Sun, Moon, Gift, Store, LogOut, Shield } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -31,7 +31,7 @@ const secondaryNav = [
 ];
 
 export function AppSidebar() {
-  const { organisation, user, signOut } = useAuth();
+  const { organisation, user, profile, signOut } = useAuth();
   const { state } = useSidebar();
   const { resolvedTheme, setTheme } = useTheme();
   const collapsed = state === "collapsed";
@@ -113,6 +113,15 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="px-4 pb-4 space-y-3">
+        {profile?.is_super_admin && (
+          <a
+            href="/admin"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-amber-400/70 hover:bg-amber-500/10 hover:text-amber-400 transition-all duration-200 w-full"
+          >
+            <Shield className="h-4 w-4 flex-shrink-0" strokeWidth={1.8} />
+            {!collapsed && <span className="text-[13px] font-medium">Admin Portal</span>}
+          </a>
+        )}
         <button
           onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
           className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sidebar-foreground/50 hover:bg-white/[0.06] hover:text-sidebar-foreground transition-all duration-200 w-full"

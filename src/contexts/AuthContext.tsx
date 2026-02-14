@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
+import { setSentryUser, clearSentryUser } from "@/lib/sentry";
+import { identifyUser, resetUser } from "@/lib/posthog";
 
 type Profile = Tables<"profiles">;
 type Organisation = Tables<"organisations">;
@@ -40,8 +42,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq("id", data.org_id)
         .single();
       setOrganisation(orgData);
+
+      // Identify user for error tracking and analytics
+      setSentryUser(userId, data.email, data.org_id || undefined);
+      identifyUser(userId, { email: data.email, org_id: data.org_id, plan_tier: orgData?.plan_tier });
     } else {
       setOrganisation(null);
+
+      // Identify user without org context
+      if (data) {
+        setSentryUser(userId, data.email);
+        identifyUser(userId, { email: data.email });
+      }
     }
   };
 
@@ -80,6 +92,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
     setProfile(null);
     setOrganisation(null);
+    clearSentryUser();
+    resetUser();
   };
 
   return (

@@ -7,6 +7,9 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
+import { AdminRoute } from "@/components/admin/AdminRoute";
+import { AdminLayout } from "@/components/admin/AdminLayout";
+import { SentryErrorBoundary } from "@/components/SentryErrorBoundary";
 import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
@@ -23,11 +26,16 @@ import Portal from "./pages/Portal";
 import TemplateMarketplace from "./pages/TemplateMarketplace";
 import AIAssessmentGenerator from "./pages/AIAssessmentGenerator";
 import Referrals from "./pages/Referrals";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminOrganisations from "./pages/admin/AdminOrganisations";
+import AdminFeatureFlags from "./pages/admin/AdminFeatureFlags";
+import AdminLegalContent from "./pages/admin/AdminLegalContent";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <SentryErrorBoundary>
     <ThemeProvider>
       <TooltipProvider>
         <Toaster />
@@ -42,6 +50,12 @@ const App = () => (
               <Route path="/portal/:orgSlug" element={<Portal />} />
               <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/templates" element={<TemplateMarketplace />} />
+              <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="organisations" element={<AdminOrganisations />} />
+                <Route path="feature-flags" element={<AdminFeatureFlags />} />
+                <Route path="legal" element={<AdminLegalContent />} />
+              </Route>
               <Route path="/assessments/:id" element={<ProtectedRoute><AssessmentBuilder /></ProtectedRoute>} />
               <Route path="/assessments/generate" element={<ProtectedRoute><AIAssessmentGenerator /></ProtectedRoute>} />
               <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
@@ -58,6 +72,7 @@ const App = () => (
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>
+    </SentryErrorBoundary>
   </QueryClientProvider>
 );
 

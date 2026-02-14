@@ -18,6 +18,7 @@ import { ShareButtons } from "@/components/results-page/sections/ShareButtons";
 import { AINarrativeSection } from "@/components/results-page/sections/AINarrativeSection";
 import { PoweredByBadge } from "@/components/PoweredByBadge";
 import { DownloadReportButton } from "@/components/pdf-report/DownloadReportButton";
+import type { ReportThemeId } from "@/components/pdf-report/themes";
 
 type ScoreTier = Tables<"score_tiers">;
 type Category = Tables<"categories">;
@@ -223,7 +224,7 @@ export default function PublicResults() {
               )}
             </p>
           </div>
-          <DownloadReportButton data={data} />
+          <DownloadReportButton data={data} themeId={((data.assessment.settings_json as any)?.report_theme as ReportThemeId) || undefined} />
         </div>
 
         {visibleSections.length > 0 ? (
