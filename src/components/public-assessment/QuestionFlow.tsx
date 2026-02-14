@@ -5,6 +5,7 @@ import { QuestionRenderer } from "./QuestionRenderer";
 import type { AssessmentData } from "@/pages/PublicAssessment";
 import type { Tables } from "@/integrations/supabase/types";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 type Question = Tables<"questions">;
 type AnswerOption = Tables<"answer_options">;
@@ -52,7 +53,7 @@ export function QuestionFlow({ data, leadId, brandColour, onCompleted, setLeadId
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, QuestionAnswer>>({});
-  const [transitioning, setTransitioning] = useState(false);
+  const [direction, setDirection] = useState<1 | -1>(1);
 
   const currentQuestion = sortedQuestions[currentIndex];
   const totalQuestions = sortedQuestions.length;
@@ -71,7 +72,6 @@ export function QuestionFlow({ data, leadId, brandColour, onCompleted, setLeadId
 
   const saveResponse = useCallback(async (questionId: string, answer: QuestionAnswer) => {
     if (!leadId) return;
-    // Upsert response
     const { data: existing } = await supabase
       .from("responses")
       .select("id")
@@ -97,21 +97,14 @@ export function QuestionFlow({ data, leadId, brandColour, onCompleted, setLeadId
     }
   }, [leadId]);
 
-  const transition = (cb: () => void) => {
-    setTransitioning(true);
-    setTimeout(() => {
-      cb();
-      setTransitioning(false);
-    }, 200);
-  };
-
   const handleNext = async () => {
     if (currentQuestion && currentAnswer) {
       await saveResponse(currentQuestion.id, currentAnswer);
     }
 
     if (currentIndex < totalQuestions - 1) {
-      transition(() => setCurrentIndex(i => i + 1));
+      setDirection(1);
+      setCurrentIndex(i => i + 1);
     } else {
       onCompleted();
     }
@@ -119,12 +112,12 @@ export function QuestionFlow({ data, leadId, brandColour, onCompleted, setLeadId
 
   const handleBack = () => {
     if (currentIndex > 0) {
-      transition(() => setCurrentIndex(i => i - 1));
+      setDirection(-1);
+      setCurrentIndex(i => i - 1);
     }
   };
 
   if (!currentQuestion) {
-    // No questions in this assessment — skip to completion
     if (totalQuestions === 0) {
       onCompleted();
     }
@@ -133,11 +126,17 @@ export function QuestionFlow({ data, leadId, brandColour, onCompleted, setLeadId
 
   const options = optionsByQuestion.get(currentQuestion.id) || [];
 
+  const variants = {
+    enter: (dir: number) => ({ x: dir > 0 ? 60 : -60, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir: number) => ({ x: dir > 0 ? -60 : 60, opacity: 0 }),
+  };
+
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-2xl mx-auto flex flex-col min-h-0">
       {/* Progress */}
       {(settings.show_progress_bar !== false) && (
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs text-muted-foreground">
               Question {currentIndex + 1} of {totalQuestions}
@@ -150,50 +149,61 @@ export function QuestionFlow({ data, leadId, brandColour, onCompleted, setLeadId
         </div>
       )}
 
-      {/* Question */}
-      <div
-        className="transition-opacity duration-200"
-        style={{ opacity: transitioning ? 0 : 1 }}
-      >
-        {category && (
-          <span className="text-xs font-medium uppercase tracking-wide mb-3 block" style={{ color: brandColour }}>
-            {category.name}
-          </span>
-        )}
+      {/* Question with AnimatePresence */}
+      <div className="flex-1 pb-24 sm:pb-0">
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={currentQuestion.id}
+            custom={direction}
+            variants={variants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+          >
+            {category && (
+              <span className="text-xs font-medium uppercase tracking-wide mb-3 block" style={{ color: brandColour }}>
+                {category.name}
+              </span>
+            )}
 
-        <h2 className="text-xl font-semibold mb-6">{currentQuestion.text}</h2>
+            <h2 className="text-lg sm:text-xl font-semibold mb-5 sm:mb-6">{currentQuestion.text}</h2>
 
-        {currentQuestion.help_text && (
-          <p className="text-sm text-muted-foreground mb-6">{currentQuestion.help_text}</p>
-        )}
+            {currentQuestion.help_text && (
+              <p className="text-sm text-muted-foreground mb-5 sm:mb-6">{currentQuestion.help_text}</p>
+            )}
 
-        <QuestionRenderer
-          question={currentQuestion}
-          options={options}
-          answer={currentAnswer || { selectedOptionIds: [], openTextValue: "", pointsAwarded: 0 }}
-          onAnswer={(a) => setAnswer(currentQuestion.id, a)}
-          brandColour={brandColour}
-        />
+            <QuestionRenderer
+              question={currentQuestion}
+              options={options}
+              answer={currentAnswer || { selectedOptionIds: [], openTextValue: "", pointsAwarded: 0 }}
+              onAnswer={(a) => setAnswer(currentQuestion.id, a)}
+              brandColour={brandColour}
+            />
+          </motion.div>
+        </AnimatePresence>
       </div>
 
-      {/* Navigation */}
-      <div className="flex justify-between items-center mt-10">
-        <button
-          onClick={handleBack}
-          disabled={currentIndex === 0}
-          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-        >
-          <ChevronLeft className="h-4 w-4" /> Back
-        </button>
+      {/* Fixed bottom navigation on mobile, normal on desktop */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-border px-4 py-3 sm:relative sm:bg-transparent sm:backdrop-blur-none sm:border-0 sm:px-0 sm:py-0 sm:mt-10 z-10">
+        <div className="flex justify-between items-center max-w-2xl mx-auto">
+          <button
+            onClick={handleBack}
+            disabled={currentIndex === 0}
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4" /> Back
+          </button>
 
-        <button
-          onClick={handleNext}
-          disabled={!canAdvance}
-          className="flex items-center gap-1 h-10 px-6 rounded-md text-white text-sm font-medium transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
-          style={{ backgroundColor: brandColour }}
-        >
-          {currentIndex === totalQuestions - 1 ? "Finish" : "Next"} <ChevronRight className="h-4 w-4" />
-        </button>
+          <button
+            onClick={handleNext}
+            disabled={!canAdvance}
+            className="flex items-center gap-1 h-10 px-6 rounded-md text-white text-sm font-medium transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ backgroundColor: brandColour }}
+          >
+            {currentIndex === totalQuestions - 1 ? "Finish" : "Next"} <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </div>
   );

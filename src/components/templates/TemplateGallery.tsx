@@ -19,6 +19,10 @@ const CATEGORY_BADGE_STYLES: Record<TemplateCategory, string> = {
   consulting: "bg-accent/10 text-accent border-0",
   accounting: "bg-success/10 text-success border-0",
   advisory: "bg-purple-500/10 text-purple-600 border-0",
+  technology: "bg-blue-500/10 text-blue-600 border-0",
+  hr: "bg-pink-500/10 text-pink-600 border-0",
+  compliance: "bg-amber-500/10 text-amber-600 border-0",
+  operations: "bg-emerald-500/10 text-emerald-600 border-0",
 };
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
@@ -63,16 +67,16 @@ export function TemplateGallery({ onUseTemplate, onBack, loading }: Props) {
               className="pl-9 h-9 text-[13px]"
             />
           </div>
-          <div className="flex gap-1.5">
-            {(["all", "consulting", "accounting", "advisory"] as const).map(cat => (
+          <div className="flex gap-1.5 flex-wrap">
+            {(["all", ...Object.keys(TEMPLATE_CATEGORY_LABELS)] as const).map(cat => (
               <Button
                 key={cat}
                 variant={categoryFilter === cat ? "default" : "outline"}
                 size="sm"
                 className="h-9 text-[12px] px-3"
-                onClick={() => setCategoryFilter(cat)}
+                onClick={() => setCategoryFilter(cat as TemplateCategory | "all")}
               >
-                {cat === "all" ? "All" : TEMPLATE_CATEGORY_LABELS[cat]}
+                {cat === "all" ? "All" : TEMPLATE_CATEGORY_LABELS[cat as TemplateCategory]}
               </Button>
             ))}
           </div>

@@ -1,6 +1,6 @@
 // Pre-built assessment template fixtures for professional services firms
 
-export type TemplateCategory = "consulting" | "accounting" | "advisory";
+export type TemplateCategory = "consulting" | "accounting" | "advisory" | "technology" | "hr" | "compliance" | "operations";
 
 export interface TemplateFixture {
   title: string;
@@ -441,4 +441,8 @@ export const TEMPLATE_CATEGORY_LABELS: Record<TemplateCategory, string> = {
   consulting: "Consulting",
   accounting: "Accounting",
   advisory: "Advisory",
+  technology: "Technology",
+  hr: "HR",
+  compliance: "Compliance",
+  operations: "Operations",
 };
