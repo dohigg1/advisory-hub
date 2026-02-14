@@ -24,6 +24,32 @@ Deno.serve(async (req) => {
   );
 
   try {
+    // Validate admin authentication
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const token = authHeader.replace("Bearer ", "");
+    const { data: userData, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !userData.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    // Verify user is admin
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("org_id, role")
+      .eq("auth_user_id", userData.user.id)
+      .single();
+    if (!profile?.org_id || profile.role !== "admin") {
+      return new Response(JSON.stringify({ error: "Admin access required" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { action } = await req.json();
 
     // ── Notify clients of new assessment ──
