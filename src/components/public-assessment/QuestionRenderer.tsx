@@ -20,7 +20,9 @@ interface Props {
 
 /* ── animation variants ─────────────────────────────────────── */
 
-const cardVariants = {
+import type { Variants } from "framer-motion";
+
+const cardVariants: Variants = {
   idle: { scale: 1 },
   tap: { scale: 0.98 },
   selected: {
@@ -29,7 +31,7 @@ const cardVariants = {
   },
 };
 
-const checkVariants = {
+const checkVariants: Variants = {
   hidden: { scale: 0, opacity: 0 },
   visible: {
     scale: 1,
@@ -38,7 +40,7 @@ const checkVariants = {
   },
 };
 
-const ratingVariants = {
+const ratingVariants: Variants = {
   idle: { scale: 1 },
   tap: { scale: 0.9 },
   selected: {

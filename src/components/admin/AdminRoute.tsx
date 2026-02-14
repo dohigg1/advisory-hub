@@ -12,7 +12,7 @@ export function AdminRoute({ children }: { children: React.ReactNode }) {
     if (authLoading || !session) return;
 
     const checkSuperAdmin = async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("super_admins")
         .select("id")
         .eq("auth_user_id", session.user.id)

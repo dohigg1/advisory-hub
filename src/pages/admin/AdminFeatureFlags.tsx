@@ -108,7 +108,7 @@ const AdminFeatureFlags = () => {
 
   const fetchFlags = async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("feature_flags")
       .select("*")
       .order("created_at", { ascending: false });
@@ -156,7 +156,7 @@ const AdminFeatureFlags = () => {
     };
 
     if (editingFlag) {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("feature_flags")
         .update(payload)
         .eq("id", editingFlag.id);
@@ -166,7 +166,7 @@ const AdminFeatureFlags = () => {
       }
       toast({ title: "Flag updated", description: `${payload.name} has been updated.` });
     } else {
-      const { error } = await supabase.from("feature_flags").insert(payload);
+      const { error } = await (supabase as any).from("feature_flags").insert(payload);
       if (error) {
         toast({ title: "Error", description: error.message, variant: "destructive" });
         return;
@@ -179,7 +179,7 @@ const AdminFeatureFlags = () => {
   };
 
   const handleDelete = async (flag: FeatureFlag) => {
-    const { error } = await supabase.from("feature_flags").delete().eq("id", flag.id);
+    const { error } = await (supabase as any).from("feature_flags").delete().eq("id", flag.id);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
       return;
@@ -189,7 +189,7 @@ const AdminFeatureFlags = () => {
   };
 
   const handleToggleEnabled = async (flag: FeatureFlag) => {
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from("feature_flags")
       .update({ global_enabled: !flag.global_enabled })
       .eq("id", flag.id);
@@ -210,7 +210,7 @@ const AdminFeatureFlags = () => {
   };
 
   const fetchOverrides = async (flagId: string) => {
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("feature_flag_overrides")
       .select("*")
       .eq("flag_id", flagId)
@@ -227,7 +227,7 @@ const AdminFeatureFlags = () => {
   const handleAddOverride = async () => {
     if (!selectedFlag || !newOverrideOrgId) return;
 
-    const { error } = await supabase.from("feature_flag_overrides").insert({
+    const { error } = await (supabase as any).from("feature_flag_overrides").insert({
       flag_id: selectedFlag.id,
       org_id: newOverrideOrgId,
       enabled: newOverrideEnabled,
@@ -245,7 +245,7 @@ const AdminFeatureFlags = () => {
 
   const handleDeleteOverride = async (overrideId: string) => {
     if (!selectedFlag) return;
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from("feature_flag_overrides")
       .delete()
       .eq("id", overrideId);
