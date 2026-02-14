@@ -1316,6 +1316,24 @@ export type Database = {
           },
         ]
       }
+      super_admins: {
+        Row: {
+          auth_user_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          auth_user_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          auth_user_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       team_invitations: {
         Row: {
           accepted_at: string | null
