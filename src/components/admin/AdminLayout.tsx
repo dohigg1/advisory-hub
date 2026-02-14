@@ -4,10 +4,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard,
   Building2,
-  Users,
   ToggleRight,
   FileText,
-  Activity,
+  ClipboardList,
   Shield,
   ChevronLeft,
   LogOut,
@@ -20,6 +19,7 @@ const adminNav = [
   { title: "Organisations", url: "/admin/organisations", icon: Building2 },
   { title: "Feature Flags", url: "/admin/feature-flags", icon: ToggleRight },
   { title: "Legal Content", url: "/admin/legal", icon: FileText },
+  { title: "Audit Log", url: "/admin/audit-log", icon: ClipboardList },
 ];
 
 export function AdminLayout() {

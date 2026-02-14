@@ -56,9 +56,22 @@ serve(async (req) => {
     // Check org's current plan from database first
     const { data: org } = await supabaseAdmin
       .from("organisations")
-      .select("plan_tier, stripe_customer_id, subscription_status, current_period_end")
+      .select("plan_tier, stripe_customer_id, subscription_status, current_period_end, admin_plan_tier")
       .eq("id", profile.org_id)
       .single();
+
+    // If admin has overridden the tier, use that without calling Stripe
+    if (org?.admin_plan_tier) {
+      return new Response(JSON.stringify({
+        subscribed: true,
+        plan_tier: org.admin_plan_tier,
+        subscription_end: null,
+        subscription_status: "admin_override",
+        admin_override: true,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // If we have a stripe customer, verify with Stripe
     if (org?.stripe_customer_id) {
