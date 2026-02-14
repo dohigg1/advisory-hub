@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          admin_user_id: string
+          created_at: string
+          details: Json | null
+          id: string
+          target_org_id: string | null
+        }
+        Insert: {
+          action: string
+          admin_user_id: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_org_id?: string | null
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_org_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_audit_log_target_org_id_fkey"
+            columns: ["target_org_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       answer_options: {
         Row: {
           id: string
@@ -935,6 +970,10 @@ export type Database = {
       }
       organisations: {
         Row: {
+          admin_notes: string | null
+          admin_override_at: string | null
+          admin_override_by: string | null
+          admin_plan_tier: string | null
           created_at: string
           current_period_end: string | null
           deleted_at: string | null
@@ -950,6 +989,10 @@ export type Database = {
           subscription_status: string | null
         }
         Insert: {
+          admin_notes?: string | null
+          admin_override_at?: string | null
+          admin_override_by?: string | null
+          admin_plan_tier?: string | null
           created_at?: string
           current_period_end?: string | null
           deleted_at?: string | null
@@ -965,6 +1008,10 @@ export type Database = {
           subscription_status?: string | null
         }
         Update: {
+          admin_notes?: string | null
+          admin_override_at?: string | null
+          admin_override_by?: string | null
+          admin_plan_tier?: string | null
           created_at?: string
           current_period_end?: string | null
           deleted_at?: string | null
@@ -980,6 +1027,41 @@ export type Database = {
           subscription_status?: string | null
         }
         Relationships: []
+      }
+      plan_permission_overrides: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          org_id: string
+          permission_key: string
+          permission_value: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          org_id: string
+          permission_key: string
+          permission_value: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          org_id?: string
+          permission_key?: string
+          permission_value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_permission_overrides_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       portal_access_logs: {
         Row: {
@@ -1972,6 +2054,7 @@ export type Database = {
       }
       is_org_admin: { Args: { _org_id: string }; Returns: boolean }
       is_org_member: { Args: { _org_id: string }; Returns: boolean }
+      is_super_admin: { Args: never; Returns: boolean }
       question_org_id: { Args: { _question_id: string }; Returns: string }
       recalculate_benchmarks: {
         Args: { _assessment_id: string }

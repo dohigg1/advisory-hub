@@ -30,6 +30,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminOrganisations from "./pages/admin/AdminOrganisations";
 import AdminFeatureFlags from "./pages/admin/AdminFeatureFlags";
 import AdminLegalContent from "./pages/admin/AdminLegalContent";
+import AdminAuditLog from "./pages/admin/AdminAuditLog";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ const App = () => (
                 <Route path="organisations" element={<AdminOrganisations />} />
                 <Route path="feature-flags" element={<AdminFeatureFlags />} />
                 <Route path="legal" element={<AdminLegalContent />} />
+                <Route path="audit-log" element={<AdminAuditLog />} />
               </Route>
               <Route path="/assessments/generate" element={<ProtectedRoute><AIGenerateAssessment /></ProtectedRoute>} />
               <Route path="/assessments/:id" element={<ProtectedRoute><AssessmentBuilder /></ProtectedRoute>} />
