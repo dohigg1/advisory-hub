@@ -15,6 +15,7 @@ import { NextStepsSection } from "@/components/results-page/sections/NextStepsSe
 import { ConsultantInfoSection } from "@/components/results-page/sections/ConsultantInfoSection";
 import { ProgressComparisonSection } from "@/components/results-page/sections/ProgressComparisonSection";
 import { ShareButtons } from "@/components/results-page/sections/ShareButtons";
+import { AiNarrativeSection } from "@/components/results-page/sections/AiNarrativeSection";
 import { DownloadReportButton } from "@/components/pdf-report/DownloadReportButton";
 
 type ScoreTier = Tables<"score_tiers">;
@@ -247,6 +248,9 @@ export default function PublicResults() {
             <RadarChartSection section={createDefault("radar_chart")} data={data} />
           </>
         )}
+
+        {/* AI Narrative Section — rendered after configured sections */}
+        <AiNarrativeSection data={data} />
 
         <ShareButtons data={data} />
         <footer className="text-center text-xs text-slate-400 pb-8">

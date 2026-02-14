@@ -1167,6 +1167,7 @@ export type Database = {
           category_scores_json: Json
           id: string
           lead_id: string
+          narrative_json: Json | null
           percentage: number | null
           tier_id: string | null
           total_points: number
@@ -1178,6 +1179,7 @@ export type Database = {
           category_scores_json?: Json
           id?: string
           lead_id: string
+          narrative_json?: Json | null
           percentage?: number | null
           tier_id?: string | null
           total_points?: number
@@ -1189,6 +1191,7 @@ export type Database = {
           category_scores_json?: Json
           id?: string
           lead_id?: string
+          narrative_json?: Json | null
           percentage?: number | null
           tier_id?: string | null
           total_points?: number
