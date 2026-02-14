@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   LogOut,
   ArrowLeft,
+  ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +21,7 @@ const adminNav = [
   { title: "Organisations", url: "/admin/organisations", icon: Building2 },
   { title: "Feature Flags", url: "/admin/feature-flags", icon: ToggleRight },
   { title: "Legal Content", url: "/admin/legal", icon: FileText },
+  { title: "Audit Log", url: "/admin/audit-log", icon: ClipboardList },
 ];
 
 export function AdminLayout() {

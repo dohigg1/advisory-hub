@@ -63,6 +63,41 @@ export type Database = {
           },
         ]
       }
+      admin_audit_log: {
+        Row: {
+          id: string
+          admin_user_id: string
+          action: string
+          target_org_id: string | null
+          details: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          admin_user_id: string
+          action: string
+          target_org_id?: string | null
+          details?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          admin_user_id?: string
+          action?: string
+          target_org_id?: string | null
+          details?: Json
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_audit_log_target_org_id_fkey"
+            columns: ["target_org_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_keys: {
         Row: {
           created_at: string
@@ -678,6 +713,10 @@ export type Database = {
       }
       organisations: {
         Row: {
+          admin_notes: string | null
+          admin_override_at: string | null
+          admin_override_by: string | null
+          admin_plan_tier: string | null
           created_at: string
           current_period_end: string | null
           deleted_at: string | null
@@ -693,6 +732,10 @@ export type Database = {
           subscription_status: string | null
         }
         Insert: {
+          admin_notes?: string | null
+          admin_override_at?: string | null
+          admin_override_by?: string | null
+          admin_plan_tier?: string | null
           created_at?: string
           current_period_end?: string | null
           deleted_at?: string | null
@@ -708,6 +751,10 @@ export type Database = {
           subscription_status?: string | null
         }
         Update: {
+          admin_notes?: string | null
+          admin_override_at?: string | null
+          admin_override_by?: string | null
+          admin_plan_tier?: string | null
           created_at?: string
           current_period_end?: string | null
           deleted_at?: string | null
@@ -723,6 +770,41 @@ export type Database = {
           subscription_status?: string | null
         }
         Relationships: []
+      }
+      plan_permission_overrides: {
+        Row: {
+          id: string
+          org_id: string
+          permission_key: string
+          permission_value: string
+          created_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          org_id: string
+          permission_key: string
+          permission_value: string
+          created_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          org_id?: string
+          permission_key?: string
+          permission_value?: string
+          created_at?: string
+          created_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_permission_overrides_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       portal_access_logs: {
         Row: {
