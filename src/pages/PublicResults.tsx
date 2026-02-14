@@ -15,6 +15,9 @@ import { NextStepsSection } from "@/components/results-page/sections/NextStepsSe
 import { ConsultantInfoSection } from "@/components/results-page/sections/ConsultantInfoSection";
 import { ProgressComparisonSection } from "@/components/results-page/sections/ProgressComparisonSection";
 import { ShareButtons } from "@/components/results-page/sections/ShareButtons";
+import { AINarrativeSection } from "@/components/results-page/sections/AINarrativeSection";
+import { PoweredByBadge } from "@/components/PoweredByBadge";
+import { DownloadReportButton } from "@/components/pdf-report/DownloadReportButton";
 
 type ScoreTier = Tables<"score_tiers">;
 type Category = Tables<"categories">;
@@ -204,18 +207,23 @@ export default function PublicResults() {
 
   const visibleSections = data.sections.filter(s => s.is_visible);
 
+  const showPoweredBy = data.organisation?.plan_tier === "free";
+
   return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(180deg, hsl(210 20% 97%) 0%, hsl(210 15% 94%) 100%)" }}>
+    <div className="min-h-screen bg-background">
       <AssessmentHeader organisation={data.organisation} brandColour={data.brandColour} />
-      <main className="max-w-3xl mx-auto px-6 py-10 space-y-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Your Assessment Results</h1>
-          <p className="text-muted-foreground text-sm">
-            {data.assessment.title} · Completed {data.lead.completed_at ? new Date(data.lead.completed_at).toLocaleDateString() : ""}
-            {data.iterationHistory?.isRetake && (
-              <span className="ml-1.5">· Attempt #{data.iterationHistory.currentIteration?.iteration_number}</span>
-            )}
-          </p>
+      <main className="max-w-4xl mx-auto px-6 py-10 space-y-8">
+        <div className="flex items-start justify-between">
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Your Assessment Results</h1>
+            <p className="text-muted-foreground text-sm">
+              {data.assessment.title} · Completed {data.lead.completed_at ? new Date(data.lead.completed_at).toLocaleDateString() : ""}
+              {data.iterationHistory?.isRetake && (
+                <span className="ml-1.5">· Attempt #{data.iterationHistory.currentIteration?.iteration_number}</span>
+              )}
+            </p>
+          </div>
+          <DownloadReportButton data={data} />
         </div>
 
         {visibleSections.length > 0 ? (
@@ -231,6 +239,7 @@ export default function PublicResults() {
               case "next_steps": return <NextStepsSection key={key} section={section} data={data} />;
               case "consultant_info": return <ConsultantInfoSection key={key} section={section} data={data} />;
               case "progress_comparison": return <ProgressComparisonSection key={key} section={section} data={data} />;
+              case "ai_narrative": return <AINarrativeSection key={key} section={section} data={data} />;
               default: return null;
             }
           })
@@ -243,8 +252,9 @@ export default function PublicResults() {
         )}
 
         <ShareButtons data={data} />
-        <footer className="text-center text-xs text-slate-400 pb-8">
-          © {new Date().getFullYear()} {data.organisation?.name || ""}. All rights reserved.
+        <footer className="flex flex-col items-center gap-2 text-center text-xs text-muted-foreground/50 pb-8">
+          {showPoweredBy && <PoweredByBadge />}
+          <span>© {new Date().getFullYear()} {data.organisation?.name || ""}. All rights reserved.</span>
         </footer>
       </main>
     </div>

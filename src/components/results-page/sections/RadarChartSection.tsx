@@ -1,4 +1,5 @@
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts";
+import { motion } from "framer-motion";
 import type { ResultsData } from "@/pages/PublicResults";
 import type { ResultsPageSection } from "@/types/results-page";
 
@@ -21,7 +22,7 @@ export function RadarChartSection({ section, data }: Props) {
 
   if (chartData.length < 3) {
     return (
-      <section className="rounded-sm border border-border bg-card shadow-sm p-8 text-center">
+      <section className="rounded-xl border border-border bg-card shadow-sm p-8 text-center">
         {c.heading && <h2 className="text-lg font-semibold text-foreground tracking-tight mb-4">{c.heading}</h2>}
         <p className="text-muted-foreground text-sm">At least 3 categories are needed for the radar chart.</p>
       </section>
@@ -29,14 +30,19 @@ export function RadarChartSection({ section, data }: Props) {
   }
 
   return (
-    <section className="rounded-sm border border-border bg-card shadow-sm">
-      <div className="p-8">
+    <motion.section
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.15 }}
+      className="rounded-xl border border-border bg-card shadow-sm"
+    >
+      <div className="p-6 md:p-8">
         {c.heading && <h2 className="text-lg font-semibold text-foreground tracking-tight mb-6 text-center">{c.heading}</h2>}
 
         <div className="mx-auto" style={{ maxWidth: 480, height: 380 }}>
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart data={chartData}>
-              <PolarGrid stroke="hsl(var(--border))" />
+              <PolarGrid stroke="hsl(var(--border))" strokeDasharray="3 3" />
               <PolarAngleAxis
                 dataKey="category"
                 tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }}
@@ -56,8 +62,8 @@ export function RadarChartSection({ section, data }: Props) {
               <Radar
                 name="Your Score"
                 dataKey="score"
-                stroke={data.brandColour}
-                fill={data.brandColour}
+                stroke="hsl(var(--primary))"
+                fill="hsl(var(--primary))"
                 fillOpacity={c.fill_opacity ?? 0.15}
                 strokeWidth={2}
               />
@@ -68,7 +74,7 @@ export function RadarChartSection({ section, data }: Props) {
         {hasBenchmarks && (
           <div className="flex justify-center gap-8 mt-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-2">
-              <span className="w-5 h-0.5 rounded-sm" style={{ backgroundColor: data.brandColour }} />
+              <span className="w-5 h-0.5 rounded-sm bg-primary" />
               Your Score
             </span>
             <span className="flex items-center gap-2">
@@ -78,6 +84,6 @@ export function RadarChartSection({ section, data }: Props) {
           </div>
         )}
       </div>
-    </section>
+    </motion.section>
   );
 }

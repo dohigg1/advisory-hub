@@ -7,6 +7,7 @@ import { QuestionFlow } from "@/components/public-assessment/QuestionFlow";
 import { CalculatingResults } from "@/components/public-assessment/CalculatingResults";
 import { AlreadyCompleted } from "@/components/public-assessment/AlreadyCompleted";
 import { AssessmentHeader } from "@/components/public-assessment/AssessmentHeader";
+import { PoweredByBadge } from "@/components/PoweredByBadge";
 
 type Assessment = Tables<"assessments">;
 type Category = Tables<"categories">;
@@ -174,8 +175,10 @@ export default function PublicAssessment() {
 
   const brandColour = data.organisation?.primary_colour || "#1B3A5C";
 
+  const showPoweredBy = data.organisation?.plan_tier === "free";
+
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <AssessmentHeader organisation={data.organisation} brandColour={brandColour} />
 
       <main className="flex-1 flex items-center justify-center p-4">
@@ -220,6 +223,11 @@ export default function PublicAssessment() {
           />
         )}
       </main>
+      {showPoweredBy && (
+        <footer className="flex justify-center pb-4">
+          <PoweredByBadge />
+        </footer>
+      )}
     </div>
   );
 }

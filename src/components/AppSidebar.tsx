@@ -1,6 +1,7 @@
-import { BarChart3, LayoutDashboard, ClipboardCheck, Users, LineChart, Settings } from "lucide-react";
+import { BarChart3, LayoutDashboard, ClipboardCheck, Users, LineChart, Settings, Sun, Moon, Gift, Store, LogOut } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import {
   Sidebar,
   SidebarContent,
@@ -14,22 +15,27 @@ import {
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const mainNav = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Assessments", url: "/assessments", icon: ClipboardCheck },
+  { title: "Templates", url: "/templates", icon: Store },
   { title: "Leads", url: "/leads", icon: Users },
   { title: "Analytics", url: "/analytics", icon: LineChart },
 ];
 
 const secondaryNav = [
+  { title: "Referrals", url: "/referrals", icon: Gift },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
 export function AppSidebar() {
-  const { organisation } = useAuth();
+  const { organisation, user, signOut } = useAuth();
   const { state } = useSidebar();
+  const { resolvedTheme, setTheme } = useTheme();
   const collapsed = state === "collapsed";
+  const initials = user?.email?.slice(0, 2).toUpperCase() ?? "U";
 
   return (
     <Sidebar collapsible="icon" className="border-r-0 sidebar-gradient">
@@ -69,7 +75,7 @@ export function AppSidebar() {
                       to={item.url}
                       end={item.url === "/"}
                       className="flex items-center gap-3 px-3 py-2 text-[13px] font-medium rounded-lg text-sidebar-foreground/50 hover:bg-white/[0.06] hover:text-sidebar-foreground transition-all duration-200"
-                      activeClassName="bg-white/[0.08] text-white shadow-[inset_0_0.5px_0_rgba(255,255,255,0.06)]"
+                      activeClassName="bg-primary/20 text-white shadow-[inset_0_0.5px_0_rgba(255,255,255,0.06)]"
                     >
                       <item.icon className="h-[17px] w-[17px] flex-shrink-0" strokeWidth={1.8} />
                       <span>{item.title}</span>
@@ -93,7 +99,7 @@ export function AppSidebar() {
                     <NavLink
                       to={item.url}
                       className="flex items-center gap-3 px-3 py-2 text-[13px] font-medium rounded-lg text-sidebar-foreground/50 hover:bg-white/[0.06] hover:text-sidebar-foreground transition-all duration-200"
-                      activeClassName="bg-white/[0.08] text-white"
+                      activeClassName="bg-primary/20 text-white"
                     >
                       <item.icon className="h-[17px] w-[17px] flex-shrink-0" strokeWidth={1.8} />
                       <span>{item.title}</span>
@@ -106,15 +112,47 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="px-5 pb-5">
+      <SidebarFooter className="px-4 pb-4 space-y-3">
+        <button
+          onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sidebar-foreground/50 hover:bg-white/[0.06] hover:text-sidebar-foreground transition-all duration-200 w-full"
+        >
+          {resolvedTheme === "dark" ? (
+            <Sun className="h-4 w-4 flex-shrink-0" strokeWidth={1.8} />
+          ) : (
+            <Moon className="h-4 w-4 flex-shrink-0" strokeWidth={1.8} />
+          )}
+          {!collapsed && (
+            <span className="text-[13px] font-medium">
+              {resolvedTheme === "dark" ? "Light Mode" : "Dark Mode"}
+            </span>
+          )}
+        </button>
+
         {!collapsed && (
           <div className="rounded-lg bg-white/[0.04] border border-white/[0.06] px-3 py-2.5">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-sidebar-foreground/40">
-              {organisation?.plan_tier === "free" ? "Free Plan" : organisation?.plan_tier}
+            <div className="flex items-center gap-2.5">
+              <Avatar className="h-7 w-7">
+                <AvatarFallback className="bg-accent/20 text-accent text-[10px] font-bold">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <div className="text-[11px] font-medium text-sidebar-foreground/80 truncate">
+                  {user?.email}
+                </div>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-sidebar-foreground/40">
+                  {organisation?.plan_tier === "free" ? "Free Plan" : `${organisation?.plan_tier} Plan`}
+                </div>
+              </div>
             </div>
-            <div className="text-[11px] text-accent mt-0.5 font-medium cursor-pointer hover:text-accent/80 transition-colors">
-              Upgrade →
-            </div>
+            <button
+              onClick={signOut}
+              className="flex items-center gap-2 mt-2.5 pt-2.5 border-t border-white/[0.06] text-sidebar-foreground/40 hover:text-sidebar-foreground/70 transition-colors w-full"
+            >
+              <LogOut className="h-3.5 w-3.5" strokeWidth={1.8} />
+              <span className="text-[11px] font-medium">Sign out</span>
+            </button>
           </div>
         )}
       </SidebarFooter>

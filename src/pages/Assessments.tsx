@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, ClipboardCheck, MoreVertical, Trash2, ArrowUpRight, LayoutTemplate } from "lucide-react";
+import { Plus, ClipboardCheck, MoreVertical, Trash2, ArrowUpRight, LayoutTemplate, Sparkles } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { Assessment, AssessmentType } from "@/types/assessment";
 import { ASSESSMENT_TYPE_LABELS, DEFAULT_SCORE_TIERS } from "@/types/assessment";
@@ -245,6 +245,13 @@ const Assessments = () => {
           <p className="text-[13px] text-muted-foreground mt-0.5">Create and manage client assessments</p>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            className="gap-2 shadow-soft-sm h-9 text-[13px] bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20 hover:border-primary/40"
+            onClick={() => navigate("/assessments/generate")}
+          >
+            <Sparkles className="h-4 w-4 text-primary" /> Generate with AI
+          </Button>
           <Button variant="outline" className="gap-2 shadow-soft-sm h-9 text-[13px]" onClick={() => setShowTemplates(true)}>
             <LayoutTemplate className="h-4 w-4" /> Templates
           </Button>

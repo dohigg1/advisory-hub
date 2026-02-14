@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { pdf } from "@react-pdf/renderer";
 import { Download, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { ResultsData } from "@/pages/PublicResults";
 import { ReportDocument } from "./ReportDocument";
 
@@ -32,21 +33,18 @@ export function DownloadReportButton({ data }: Props) {
   }, [data]);
 
   return (
-    <button
+    <Button
       onClick={handleDownload}
       disabled={generating}
-      className="inline-flex items-center gap-2 h-10 px-5 rounded-lg text-sm font-medium transition-colors disabled:opacity-60"
-      style={{
-        backgroundColor: data.brandColour,
-        color: "#FFFFFF",
-      }}
+      variant="outline"
+      className="gap-2 text-[13px] h-9 shrink-0"
     >
       {generating ? (
         <Loader2 className="h-4 w-4 animate-spin" />
       ) : (
         <Download className="h-4 w-4" />
       )}
-      {generating ? "Generating PDF…" : "Download PDF Report"}
-    </button>
+      {generating ? "Generating..." : "Download Full Report (PDF)"}
+    </Button>
   );
 }

@@ -19,6 +19,10 @@ const CATEGORY_BADGE_STYLES: Record<TemplateCategory, string> = {
   consulting: "bg-accent/10 text-accent border-0",
   accounting: "bg-success/10 text-success border-0",
   advisory: "bg-purple-500/10 text-purple-600 border-0",
+  technology: "bg-blue-500/10 text-blue-600 border-0",
+  hr: "bg-pink-500/10 text-pink-600 border-0",
+  compliance: "bg-amber-500/10 text-amber-600 border-0",
+  operations: "bg-teal-500/10 text-teal-600 border-0",
 };
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
