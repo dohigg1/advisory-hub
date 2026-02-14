@@ -1,5 +1,6 @@
 import { BarChart3, LayoutDashboard, ClipboardCheck, Users, LineChart, Settings, Gift } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Sidebar,
@@ -30,6 +31,7 @@ const secondaryNav = [
 export function AppSidebar() {
   const { organisation } = useAuth();
   const { state } = useSidebar();
+  const navigate = useNavigate();
   const collapsed = state === "collapsed";
 
   return (
@@ -113,7 +115,10 @@ export function AppSidebar() {
             <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-sidebar-foreground/40">
               {organisation?.plan_tier === "free" ? "Free Plan" : organisation?.plan_tier}
             </div>
-            <div className="text-[11px] text-accent mt-0.5 font-medium cursor-pointer hover:text-accent/80 transition-colors">
+            <div
+              className="text-[11px] text-accent mt-0.5 font-medium cursor-pointer hover:text-accent/80 transition-colors"
+              onClick={() => navigate("/settings?tab=billing")}
+            >
               Upgrade →
             </div>
           </div>
