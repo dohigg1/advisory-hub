@@ -1,36 +1,68 @@
 import { Page, View, Text, StyleSheet } from "@react-pdf/renderer";
 import type { ResultsData } from "@/pages/PublicResults";
-import { pageStyles } from "./shared-styles";
+import type { ReportTheme } from "./themes";
 import { PdfBarChart } from "./charts/PdfBarChart";
+import { createPageStyles } from "./shared-styles";
 
-const styles = StyleSheet.create({
-  heading: { fontSize: 20, fontWeight: 700, color: "#1E293B", marginBottom: 20 },
-  subheading: { fontSize: 12, color: "#64748B", marginBottom: 20 },
-  overallRow: { flexDirection: "row", alignItems: "center", marginBottom: 24, padding: 12, backgroundColor: "#F8FAFC", borderRadius: 6 },
-  overallLabel: { fontSize: 10, color: "#64748B", marginBottom: 2 },
-  overallValue: { fontSize: 22, fontWeight: 700, color: "#1E293B" },
-  deltaPositive: { fontSize: 12, fontWeight: 700, color: "#16A34A" },
-  deltaNegative: { fontSize: 12, fontWeight: 700, color: "#DC2626" },
-  deltaNeutral: { fontSize: 12, fontWeight: 700, color: "#64748B" },
-  table: { marginTop: 12 },
-  tableHeader: { flexDirection: "row", borderBottomWidth: 1, borderColor: "#E2E8F0", paddingBottom: 6, marginBottom: 4 },
-  tableHeaderCell: { fontSize: 8, fontWeight: 700, color: "#94A3B8", textTransform: "uppercase", letterSpacing: 0.8 },
-  tableRow: { flexDirection: "row", paddingVertical: 5, borderBottomWidth: 0.5, borderColor: "#F1F5F9" },
-  tableCell: { fontSize: 10, color: "#334155" },
-  tableCellBold: { fontSize: 10, color: "#1E293B", fontWeight: 700 },
-  improvementSection: { marginTop: 24 },
-  improvementHeading: { fontSize: 12, fontWeight: 700, color: "#1E293B", marginBottom: 8 },
-  improvementItem: { flexDirection: "row", alignItems: "center", marginBottom: 4 },
-  improvementDot: { width: 6, height: 6, borderRadius: 3, marginRight: 8 },
-  improvementText: { fontSize: 10, color: "#334155", flex: 1 },
-  improvementDelta: { fontSize: 10, fontWeight: 700 },
-  footer: { position: "absolute", bottom: 20, left: 40, right: 40, flexDirection: "row", justifyContent: "space-between" },
-  footerText: { fontSize: 7, color: "#94A3B8" },
-});
+interface Props {
+  data: ResultsData;
+  theme: ReportTheme;
+}
 
-interface Props { data: ResultsData }
+export function ProgressPage({ data, theme }: Props) {
+  const t = theme;
+  const ps = createPageStyles(t);
 
-export function ProgressPage({ data }: Props) {
+  const styles = StyleSheet.create({
+    heading: {
+      fontSize: t.typography.headingSizes.h1,
+      fontWeight: 700,
+      fontFamily: t.typography.headingFont,
+      color: t.typography.headingColor,
+      marginBottom: 20,
+    },
+    subheading: { fontSize: 12, color: t.typography.bodyColor, marginBottom: 20 },
+    overallRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 24,
+      padding: t.sections.padding,
+      backgroundColor: t.sections.backgroundColor,
+      borderRadius: t.sections.borderRadius,
+      ...(t.sections.backgroundColor === "#FFFFFF" ? { borderWidth: 1, borderColor: t.sections.borderColor } : {}),
+    },
+    overallLabel: { fontSize: 10, color: t.typography.bodyColor, marginBottom: 2 },
+    overallValue: { fontSize: 22, fontWeight: 700, color: t.typography.headingColor },
+    deltaPositive: { fontSize: 12, fontWeight: 700, color: "#16A34A" },
+    deltaNegative: { fontSize: 12, fontWeight: 700, color: "#DC2626" },
+    deltaNeutral: { fontSize: 12, fontWeight: 700, color: t.typography.bodyColor },
+    table: { marginTop: 12 },
+    tableHeader: {
+      flexDirection: "row",
+      borderBottomWidth: 1,
+      borderColor: t.sections.borderColor,
+      paddingBottom: 6,
+      marginBottom: 4,
+    },
+    tableHeaderCell: { fontSize: 8, fontWeight: 700, color: t.typography.mutedColor, textTransform: "uppercase", letterSpacing: 0.8 },
+    tableRow: {
+      flexDirection: "row",
+      paddingVertical: 5,
+      borderBottomWidth: 0.5,
+      borderColor: t.charts.gridColor,
+    },
+    tableCell: { fontSize: 10, color: t.typography.bodyColor },
+    tableCellBold: { fontSize: 10, color: t.typography.headingColor, fontWeight: 700 },
+    improvementSection: { marginTop: 24 },
+    improvementHeading: { fontSize: 12, fontWeight: 700, color: t.typography.headingColor, marginBottom: 8 },
+    improvementItem: { flexDirection: "row", alignItems: "center", marginBottom: 4 },
+    improvementDot: { width: 6, height: 6, borderRadius: 3, marginRight: 8 },
+    improvementText: { fontSize: 10, color: t.typography.bodyColor, flex: 1 },
+    improvementDelta: { fontSize: 10, fontWeight: 700 },
+    footer: { position: "absolute", bottom: 20, left: 40, right: 40, flexDirection: "row", justifyContent: "space-between" },
+    footerText: { fontSize: 7, color: t.typography.mutedColor },
+  });
+
   const history = data.iterationHistory;
   if (!history || !history.isRetake || !history.currentIteration || !history.previousIteration) return null;
 
@@ -49,7 +81,7 @@ export function ProgressPage({ data }: Props) {
   const needsAttention = [...comparisons].sort((a, b) => a.delta - b.delta).slice(0, 3).filter(c => c.delta < 0);
 
   return (
-    <Page size="A4" style={pageStyles.page}>
+    <Page size="A4" style={ps.page}>
       <Text style={styles.heading}>Progress Report</Text>
       <Text style={styles.subheading}>
         Iteration {current.iteration_number} — Compared to Iteration {previous.iteration_number}
@@ -63,7 +95,7 @@ export function ProgressPage({ data }: Props) {
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.overallLabel}>Previous Score</Text>
-          <Text style={{ fontSize: 18, color: "#64748B" }}>{previous.overall_percentage ?? 0}%</Text>
+          <Text style={{ fontSize: 18, color: t.typography.bodyColor }}>{previous.overall_percentage ?? 0}%</Text>
         </View>
         <View style={{ flex: 1, alignItems: "flex-end" }}>
           <Text style={styles.overallLabel}>Change</Text>

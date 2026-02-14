@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { RadialBarChart, RadialBar, ResponsiveContainer } from "recharts";
 import type { ResultsData } from "@/pages/PublicResults";
 import type { ResultsPageSection } from "@/types/results-page";
+import { motion } from "framer-motion";
 
 interface Props {
   section: ResultsPageSection;
@@ -50,32 +51,38 @@ export function OverallScoreSection({ section, data }: Props) {
   ];
 
   return (
-    <section ref={scoreRef} className="relative overflow-hidden rounded-sm border border-border bg-card shadow-sm">
+    <motion.section
+      ref={scoreRef}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="relative overflow-hidden rounded-xl border border-border bg-card shadow-sm"
+    >
       {/* Subtle accent stripe */}
-      <div className="absolute top-0 left-0 right-0 h-1" style={{ backgroundColor: tierColour }} />
+      <div className="absolute top-0 left-0 right-0 h-1 rounded-t-xl" style={{ backgroundColor: tierColour }} />
 
       <div className="p-6 sm:p-8 pt-8 sm:pt-10 text-center">
         {c.heading && (
           <h2 className="text-lg font-semibold text-foreground tracking-tight mb-6 sm:mb-8">{c.heading}</h2>
         )}
 
-        <div className="relative mx-auto" style={{ width: 200, height: 200 }}>
+        <div className="relative mx-auto" style={{ width: 240, height: 240 }}>
           <ResponsiveContainer width="100%" height="100%">
             <RadialBarChart
               cx="50%"
               cy="50%"
-              innerRadius="72%"
+              innerRadius="70%"
               outerRadius="100%"
               startAngle={90}
               endAngle={-270}
               data={chartData}
-              barSize={18}
+              barSize={20}
             >
               <RadialBar
                 background={{ fill: "hsl(var(--muted))" }}
                 dataKey="value"
                 cornerRadius={10}
-                maxBarSize={18}
+                maxBarSize={20}
               />
             </RadialBarChart>
           </ResponsiveContainer>
@@ -85,34 +92,52 @@ export function OverallScoreSection({ section, data }: Props) {
               <span className="text-xl sm:text-2xl font-medium">%</span>
             </span>
             {overallTier && (
-              <span
-                className="mt-2 inline-block text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-sm"
+              <motion.span
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 1.2, duration: 0.3 }}
+                className="mt-2 inline-block text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-md"
                 style={{ backgroundColor: tierColour + "14", color: tierColour }}
               >
                 {overallTier.label}
-              </span>
+              </motion.span>
             )}
           </div>
         </div>
 
         {c.show_tier_description && overallTier?.description && (
-          <p className="mt-5 sm:mt-6 text-muted-foreground text-sm max-w-md mx-auto leading-relaxed">
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="mt-6 text-muted-foreground text-sm max-w-md mx-auto leading-relaxed"
+          >
             {overallTier.description}
-          </p>
+          </motion.p>
         )}
 
         {data.benchmarks?.percentileRank != null && (
-          <p className="mt-4 text-sm text-muted-foreground">
-            You scored higher than <strong className="text-foreground">{data.benchmarks.percentileRank}%</strong> of respondents
-          </p>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.0 }}
+            className="mt-4 text-sm text-muted-foreground"
+          >
+            Better than <strong className="text-foreground font-semibold">{data.benchmarks.percentileRank}%</strong> of similar firms
+          </motion.p>
         )}
 
         {data.benchmarks?.overall && (
-          <p className="mt-1 text-xs text-muted-foreground">
-            Industry average: {data.benchmarks.overall.avg_score}% · Based on {data.benchmarks.overall.sample_size} responses
-          </p>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2 }}
+            className="mt-1 text-xs text-muted-foreground"
+          >
+            Industry average: <span className="mono font-medium">{data.benchmarks.overall.avg_score}%</span> · Based on {data.benchmarks.overall.sample_size} responses
+          </motion.p>
         )}
       </div>
-    </section>
+    </motion.section>
   );
 }

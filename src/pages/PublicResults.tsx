@@ -16,7 +16,10 @@ import { ConsultantInfoSection } from "@/components/results-page/sections/Consul
 import { ProgressComparisonSection } from "@/components/results-page/sections/ProgressComparisonSection";
 import { ShareButtons } from "@/components/results-page/sections/ShareButtons";
 import { AiNarrativeSection } from "@/components/results-page/sections/AiNarrativeSection";
+import { AINarrativeSection } from "@/components/results-page/sections/AINarrativeSection";
+import { PoweredByBadge } from "@/components/PoweredByBadge";
 import { DownloadReportButton } from "@/components/pdf-report/DownloadReportButton";
+import type { ReportThemeId } from "@/components/pdf-report/themes";
 
 type ScoreTier = Tables<"score_tiers">;
 type Category = Tables<"categories">;
@@ -206,8 +209,10 @@ export default function PublicResults() {
 
   const visibleSections = data.sections.filter(s => s.is_visible);
 
+  const showPoweredBy = data.organisation?.plan_tier === "free";
+
   return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(180deg, hsl(210 20% 97%) 0%, hsl(210 15% 94%) 100%)" }}>
+    <div className="min-h-screen bg-background">
       <AssessmentHeader organisation={data.organisation} brandColour={data.brandColour} />
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -221,7 +226,7 @@ export default function PublicResults() {
             </p>
           </div>
           <div className="flex justify-center sm:justify-end shrink-0">
-            <DownloadReportButton data={data} />
+            <DownloadReportButton data={data} themeId={((data.assessment.settings_json as any)?.report_theme as ReportThemeId) || undefined} />
           </div>
         </div>
 
@@ -238,6 +243,7 @@ export default function PublicResults() {
               case "next_steps": return <NextStepsSection key={key} section={section} data={data} />;
               case "consultant_info": return <ConsultantInfoSection key={key} section={section} data={data} />;
               case "progress_comparison": return <ProgressComparisonSection key={key} section={section} data={data} />;
+              case "ai_narrative": return <AINarrativeSection key={key} section={section} data={data} />;
               default: return null;
             }
           })
@@ -249,12 +255,13 @@ export default function PublicResults() {
           </>
         )}
 
-        {/* AI Narrative Section — rendered after configured sections */}
+        {/* AI Narrative Section -- rendered after configured sections */}
         <AiNarrativeSection data={data} />
 
         <ShareButtons data={data} />
-        <footer className="text-center text-xs text-slate-400 pb-8">
-          © {new Date().getFullYear()} {data.organisation?.name || ""}. All rights reserved.
+        <footer className="flex flex-col items-center gap-2 text-center text-xs text-muted-foreground/50 pb-8">
+          {showPoweredBy && <PoweredByBadge />}
+          <span>© {new Date().getFullYear()} {data.organisation?.name || ""}. All rights reserved.</span>
         </footer>
       </main>
     </div>

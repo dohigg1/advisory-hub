@@ -1,32 +1,77 @@
 import { Page, View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import type { ResultsData } from "@/pages/PublicResults";
+import type { ReportTheme } from "./themes";
 import { PdfDonutChart } from "./charts/PdfDonutChart";
 
-const styles = StyleSheet.create({
-  page: {
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 60,
-    backgroundColor: "#FFFFFF",
-  },
-  logo: { width: 120, marginBottom: 40 },
-  title: { fontSize: 28, fontWeight: 700, color: "#1E293B", textAlign: "center", marginBottom: 12 },
-  subtitle: { fontSize: 14, color: "#64748B", textAlign: "center", marginBottom: 40 },
-  respondentName: { fontSize: 16, color: "#334155", textAlign: "center", marginBottom: 4 },
-  company: { fontSize: 12, color: "#64748B", textAlign: "center", marginBottom: 30 },
-  date: { fontSize: 10, color: "#94A3B8", textAlign: "center", marginTop: 20 },
-  chartContainer: { alignItems: "center", marginTop: 10 },
-});
+interface Props {
+  data: ResultsData;
+  theme: ReportTheme;
+}
 
-interface Props { data: ResultsData }
-
-export function CoverPage({ data }: Props) {
+export function CoverPage({ data, theme }: Props) {
+  const t = theme;
   const tierColour = data.overallTier?.colour || data.brandColour;
   const respondent = [data.lead.first_name, data.lead.last_name].filter(Boolean).join(" ");
 
+  const styles = StyleSheet.create({
+    page: {
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 60,
+      backgroundColor: t.cover.backgroundColor,
+      fontFamily: t.typography.bodyFont,
+    },
+    accentBar: t.cover.accentBar
+      ? {
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: t.cover.accentBar.height,
+          backgroundColor: t.cover.accentBar.color,
+        }
+      : { height: 0 },
+    logo: { width: 120, marginBottom: 40 },
+    title: {
+      fontSize: t.typography.headingSizes.h1,
+      fontWeight: 700,
+      fontFamily: t.typography.headingFont,
+      color: t.cover.titleColor,
+      textAlign: "center",
+      marginBottom: 12,
+    },
+    subtitle: {
+      fontSize: 14,
+      color: t.cover.subtitleColor,
+      textAlign: "center",
+      marginBottom: 40,
+    },
+    respondentName: {
+      fontSize: 16,
+      color: t.cover.respondentColor,
+      textAlign: "center",
+      marginBottom: 4,
+    },
+    company: {
+      fontSize: 12,
+      color: t.cover.subtitleColor,
+      textAlign: "center",
+      marginBottom: 30,
+    },
+    date: {
+      fontSize: 10,
+      color: t.cover.dateColor,
+      textAlign: "center",
+      marginTop: 20,
+    },
+    chartContainer: { alignItems: "center", marginTop: 10 },
+  });
+
   return (
     <Page size="A4" style={styles.page}>
+      {t.cover.accentBar && <View style={styles.accentBar} />}
+
       {data.organisation?.logo_url && (
         <Image src={data.organisation.logo_url} style={styles.logo} />
       )}
@@ -40,7 +85,7 @@ export function CoverPage({ data }: Props) {
         <PdfDonutChart
           percentage={data.overallPercentage}
           size={160}
-          strokeWidth={18}
+          strokeWidth={t.charts.donutStrokeWidth}
           colour={tierColour}
           label={data.overallTier?.label}
         />

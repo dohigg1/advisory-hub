@@ -1,25 +1,49 @@
 import { Page, View, Text, StyleSheet } from "@react-pdf/renderer";
 import type { ResultsData } from "@/pages/PublicResults";
+import type { ReportTheme } from "./themes";
 import { PdfDonutChart } from "./charts/PdfDonutChart";
-import { pageStyles } from "./shared-styles";
+import { createPageStyles } from "./shared-styles";
 
-const styles = StyleSheet.create({
-  ...pageStyles,
-  row: { flexDirection: "row", gap: 30, marginBottom: 20 },
-  chartCol: { alignItems: "center", width: 140 },
-  textCol: { flex: 1 },
-  heading: { fontSize: 20, fontWeight: 700, color: "#1E293B", marginBottom: 16 },
-  paragraph: { fontSize: 10, color: "#475569", lineHeight: 1.6, marginBottom: 10 },
-  highlight: { flexDirection: "row", justifyContent: "space-between", marginTop: 16, gap: 16 },
-  highlightCard: { flex: 1, padding: 12, borderRadius: 6, backgroundColor: "#F8FAFC" },
-  highlightLabel: { fontSize: 8, color: "#94A3B8", textTransform: "uppercase", marginBottom: 4 },
-  highlightName: { fontSize: 11, fontWeight: 600, color: "#1E293B", marginBottom: 2 },
-  highlightScore: { fontSize: 10, color: "#64748B" },
-});
+interface Props {
+  data: ResultsData;
+  theme: ReportTheme;
+}
 
-interface Props { data: ResultsData }
+export function ExecutiveSummary({ data, theme }: Props) {
+  const t = theme;
+  const ps = createPageStyles(t);
 
-export function ExecutiveSummary({ data }: Props) {
+  const styles = StyleSheet.create({
+    ...ps,
+    row: { flexDirection: "row", gap: 30, marginBottom: 20 },
+    chartCol: { alignItems: "center", width: 140 },
+    textCol: { flex: 1 },
+    heading: {
+      fontSize: t.typography.headingSizes.h1,
+      fontWeight: 700,
+      fontFamily: t.typography.headingFont,
+      color: t.typography.headingColor,
+      marginBottom: 16,
+    },
+    paragraph: {
+      fontSize: 10,
+      color: t.typography.bodyColor,
+      lineHeight: 1.6,
+      marginBottom: 10,
+    },
+    highlight: { flexDirection: "row", justifyContent: "space-between", marginTop: 16, gap: 16 },
+    highlightCard: {
+      flex: 1,
+      padding: t.sections.padding,
+      borderRadius: t.sections.borderRadius,
+      backgroundColor: t.sections.backgroundColor,
+      ...(t.sections.backgroundColor === "#FFFFFF" ? { borderWidth: 1, borderColor: t.sections.borderColor } : {}),
+    },
+    highlightLabel: { fontSize: 8, color: t.typography.mutedColor, textTransform: "uppercase", marginBottom: 4 },
+    highlightName: { fontSize: 11, fontWeight: 600, color: t.typography.headingColor, marginBottom: 2 },
+    highlightScore: { fontSize: 10, color: t.typography.bodyColor },
+  });
+
   const tierColour = data.overallTier?.colour || data.brandColour;
   const sorted = [...data.categoryScores].sort((a, b) => b.percentage - a.percentage);
   const highest = sorted[0];
@@ -37,7 +61,7 @@ export function ExecutiveSummary({ data }: Props) {
           <PdfDonutChart
             percentage={data.overallPercentage}
             size={120}
-            strokeWidth={14}
+            strokeWidth={t.charts.donutStrokeWidth - 2}
             colour={tierColour}
             label={data.overallTier?.label}
           />
