@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, LayoutTemplate, ArrowRight, Sparkles, Filter } from "lucide-react";
+import { Search, LayoutTemplate, ArrowRight, Sparkles, Filter, Home } from "lucide-react";
+import { Link } from "react-router-dom";
 import { TEMPLATE_FIXTURES, TEMPLATE_CATEGORY_LABELS } from "@/data/templates";
 import type { TemplateCategory } from "@/data/templates";
 import { motion } from "framer-motion";
@@ -75,6 +76,14 @@ const TemplateMarketplace = () => {
         <div className="absolute bottom-0 left-0 w-72 h-72 bg-violet-400/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3" />
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 text-center">
+          <div className="absolute top-4 left-4 sm:left-6 lg:left-8">
+            <Button variant="ghost" size="sm" className="text-white/70 hover:text-white hover:bg-white/10 gap-1.5" asChild>
+              <Link to="/dashboard">
+                <Home className="h-4 w-4" />
+                <span className="hidden sm:inline">Dashboard</span>
+              </Link>
+            </Button>
+          </div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
