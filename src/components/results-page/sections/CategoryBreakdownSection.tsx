@@ -10,12 +10,14 @@ export function CategoryBreakdownSection({ section, data }: Props) {
   const c = section.content_json;
   const benchmarks = data.benchmarks?.categories || {};
 
-  const chartData = data.categoryScores.map(cs => ({
-    name: cs.category.name,
-    score: cs.percentage,
-    fill: cs.tier?.colour || data.brandColour,
-    benchmark: benchmarks[cs.category.id]?.avg_score ?? null,
-  }));
+  const chartData = [...data.categoryScores]
+    .sort((a, b) => a.percentage - b.percentage)
+    .map(cs => ({
+      name: cs.category.name,
+      score: cs.percentage,
+      fill: cs.tier?.colour || data.brandColour,
+      benchmark: benchmarks[cs.category.id]?.avg_score ?? null,
+    }));
 
   return (
     <section className="rounded-sm border border-border bg-card shadow-sm">

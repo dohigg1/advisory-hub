@@ -15,6 +15,7 @@ import { NextStepsSection } from "@/components/results-page/sections/NextStepsSe
 import { ConsultantInfoSection } from "@/components/results-page/sections/ConsultantInfoSection";
 import { ProgressComparisonSection } from "@/components/results-page/sections/ProgressComparisonSection";
 import { ShareButtons } from "@/components/results-page/sections/ShareButtons";
+import { DownloadReportButton } from "@/components/pdf-report/DownloadReportButton";
 
 type ScoreTier = Tables<"score_tiers">;
 type Category = Tables<"categories">;
@@ -207,15 +208,20 @@ export default function PublicResults() {
   return (
     <div className="min-h-screen" style={{ background: "linear-gradient(180deg, hsl(210 20% 97%) 0%, hsl(210 15% 94%) 100%)" }}>
       <AssessmentHeader organisation={data.organisation} brandColour={data.brandColour} />
-      <main className="max-w-3xl mx-auto px-6 py-10 space-y-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Your Assessment Results</h1>
-          <p className="text-muted-foreground text-sm">
-            {data.assessment.title} · Completed {data.lead.completed_at ? new Date(data.lead.completed_at).toLocaleDateString() : ""}
-            {data.iterationHistory?.isRetake && (
-              <span className="ml-1.5">· Attempt #{data.iterationHistory.currentIteration?.iteration_number}</span>
-            )}
-          </p>
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="text-center sm:text-left space-y-2 flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Your Assessment Results</h1>
+            <p className="text-muted-foreground text-sm">
+              {data.assessment.title} · Completed {data.lead.completed_at ? new Date(data.lead.completed_at).toLocaleDateString() : ""}
+              {data.iterationHistory?.isRetake && (
+                <span className="ml-1.5">· Attempt #{data.iterationHistory.currentIteration?.iteration_number}</span>
+              )}
+            </p>
+          </div>
+          <div className="flex justify-center sm:justify-end shrink-0">
+            <DownloadReportButton data={data} />
+          </div>
         </div>
 
         {visibleSections.length > 0 ? (
