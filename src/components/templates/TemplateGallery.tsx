@@ -122,10 +122,10 @@ export function TemplateGallery({ onUseTemplate, onBack, loading }: Props) {
 
       {/* Preview Dialog */}
       <Dialog open={!!previewTemplate} onOpenChange={open => !open && setPreviewTemplate(null)}>
-        <DialogContent className="shadow-soft-lg max-w-2xl max-h-[85vh] flex flex-col">
+        <DialogContent className="shadow-soft-lg max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
           {previewTemplate && (
             <>
-              <DialogHeader>
+              <DialogHeader className="shrink-0">
                 <div className="flex items-center gap-2 mb-1">
                   <Badge className={`text-[10px] font-semibold ${CATEGORY_BADGE_STYLES[previewTemplate.category]}`}>
                     {TEMPLATE_CATEGORY_LABELS[previewTemplate.category]}
@@ -136,7 +136,7 @@ export function TemplateGallery({ onUseTemplate, onBack, loading }: Props) {
                 <p className="text-[13px] text-muted-foreground mt-1">{previewTemplate.description}</p>
               </DialogHeader>
 
-              <ScrollArea className="flex-1 -mx-6 px-6">
+              <ScrollArea className="flex-1 min-h-0 -mx-6 px-6">
                 <div className="space-y-5 pb-4">
                   {/* Categories */}
                   <div>
