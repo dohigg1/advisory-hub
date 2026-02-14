@@ -135,26 +135,76 @@ serve(async (req) => {
         const orgId = sub.metadata?.org_id;
 
         if (orgId) {
-          await supabaseAdmin
+          // Check if the org has an active grace period
+          const { data: orgData } = await supabaseAdmin
             .from("organisations")
-            .update({
-              plan_tier: "free",
-              subscription_status: "cancelled",
-            })
-            .eq("id", orgId);
+            .select("grace_period_ends_at")
+            .eq("id", orgId)
+            .single();
 
-          await supabaseAdmin
-            .from("subscriptions")
-            .update({ status: "cancelled" })
-            .eq("org_id", orgId);
+          const gracePeriodEndsAt = orgData?.grace_period_ends_at
+            ? new Date(orgData.grace_period_ends_at)
+            : null;
+          const now = new Date();
+          const gracePeriodExpired = !gracePeriodEndsAt || gracePeriodEndsAt <= now;
 
-          await supabaseAdmin.from("audit_log").insert({
-            org_id: orgId,
-            action: "plan_changed",
-            target_type: "organisation",
-            target_id: orgId,
-            metadata_json: { new_tier: "free", reason: "subscription_cancelled" },
-          });
+          if (gracePeriodExpired) {
+            // Grace period has passed or was never set -- downgrade immediately
+            await supabaseAdmin
+              .from("organisations")
+              .update({
+                plan_tier: "free",
+                subscription_status: "cancelled",
+                grace_period_ends_at: null,
+              })
+              .eq("id", orgId);
+
+            await supabaseAdmin
+              .from("subscriptions")
+              .update({ status: "cancelled" })
+              .eq("org_id", orgId);
+
+            await supabaseAdmin.from("audit_log").insert({
+              org_id: orgId,
+              action: "plan_changed",
+              target_type: "organisation",
+              target_id: orgId,
+              metadata_json: {
+                new_tier: "free",
+                reason: "subscription_cancelled",
+                grace_period_expired: true,
+              },
+            });
+
+            console.log(`[SUBSCRIPTION] Org ${orgId} downgraded to free (grace period expired or not set)`);
+          } else {
+            // Grace period still active -- mark as cancelled but keep the tier until grace period ends
+            await supabaseAdmin
+              .from("organisations")
+              .update({
+                subscription_status: "cancelled",
+              })
+              .eq("id", orgId);
+
+            await supabaseAdmin
+              .from("subscriptions")
+              .update({ status: "cancelled" })
+              .eq("org_id", orgId);
+
+            await supabaseAdmin.from("audit_log").insert({
+              org_id: orgId,
+              action: "subscription_cancelled",
+              target_type: "organisation",
+              target_id: orgId,
+              metadata_json: {
+                reason: "subscription_cancelled",
+                grace_period_ends_at: orgData.grace_period_ends_at,
+                downgrade_deferred: true,
+              },
+            });
+
+            console.log(`[SUBSCRIPTION] Org ${orgId} cancelled but grace period active until ${orgData.grace_period_ends_at}`);
+          }
         }
         break;
       }
@@ -166,7 +216,7 @@ serve(async (req) => {
         // Find org by stripe_customer_id
         const { data: org } = await supabaseAdmin
           .from("organisations")
-          .select("id")
+          .select("id, grace_period_ends_at, subscription_status")
           .eq("stripe_customer_id", customerId)
           .single();
 
@@ -181,6 +231,24 @@ serve(async (req) => {
             period_start: invoice.period_start ? new Date(invoice.period_start * 1000).toISOString() : null,
             period_end: invoice.period_end ? new Date(invoice.period_end * 1000).toISOString() : null,
           });
+
+          // If the org was in a grace period (past_due), clear it on successful payment
+          if (org.grace_period_ends_at || org.subscription_status === "past_due") {
+            await supabaseAdmin
+              .from("organisations")
+              .update({
+                grace_period_ends_at: null,
+                subscription_status: "active",
+              })
+              .eq("id", org.id);
+
+            await supabaseAdmin
+              .from("subscriptions")
+              .update({ status: "active" })
+              .eq("org_id", org.id);
+
+            console.log(`[PAYMENT] Grace period cleared for org ${org.id} after successful payment`);
+          }
         }
         break;
       }
@@ -188,17 +256,28 @@ serve(async (req) => {
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
         const customerId = invoice.customer as string;
+        const attemptCount = invoice.attempt_count ?? 1;
 
         const { data: org } = await supabaseAdmin
           .from("organisations")
-          .select("id")
+          .select("id, grace_period_ends_at")
           .eq("stripe_customer_id", customerId)
           .single();
 
         if (org) {
+          // On first failure, set a 7-day grace period
+          const updates: Record<string, unknown> = {
+            subscription_status: "past_due",
+          };
+          if (!org.grace_period_ends_at) {
+            const gracePeriodEnd = new Date();
+            gracePeriodEnd.setDate(gracePeriodEnd.getDate() + 7);
+            updates.grace_period_ends_at = gracePeriodEnd.toISOString();
+          }
+
           await supabaseAdmin
             .from("organisations")
-            .update({ subscription_status: "past_due" })
+            .update(updates)
             .eq("id", org.id);
 
           await supabaseAdmin.from("invoices").insert({
@@ -208,6 +287,58 @@ serve(async (req) => {
             currency: invoice.currency,
             status: "failed",
             invoice_url: invoice.hosted_invoice_url,
+          });
+
+          // Send dunning email via the send-dunning-email Edge Function
+          const customerEmail = invoice.customer_email;
+          if (customerEmail) {
+            // Create a Stripe billing portal session for the customer
+            let portalUrl = "https://advisoryscore.com/settings";
+            try {
+              const portalSession = await stripe.billingPortal.sessions.create({
+                customer: customerId,
+                return_url: "https://advisoryscore.com/settings",
+              });
+              portalUrl = portalSession.url;
+            } catch (portalErr: any) {
+              console.warn("Could not create portal session for dunning:", portalErr.message);
+            }
+
+            try {
+              const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+              const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
+              await fetch(`${supabaseUrl}/functions/v1/send-dunning-email`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${serviceRoleKey}`,
+                },
+                body: JSON.stringify({
+                  org_id: org.id,
+                  attempt_number: attemptCount,
+                  customer_email: customerEmail,
+                  portal_url: portalUrl,
+                }),
+              });
+
+              console.log(`[DUNNING] Triggered dunning email attempt ${attemptCount} for org ${org.id}`);
+            } catch (emailErr: any) {
+              // Don't fail the webhook if email sending fails
+              console.error("[DUNNING] Failed to trigger dunning email:", emailErr.message);
+            }
+          }
+
+          await supabaseAdmin.from("audit_log").insert({
+            org_id: org.id,
+            action: "payment_failed",
+            target_type: "organisation",
+            target_id: org.id,
+            metadata_json: {
+              attempt_count: attemptCount,
+              invoice_id: invoice.id,
+              grace_period_ends_at: updates.grace_period_ends_at || org.grace_period_ends_at,
+            },
           });
         }
         break;

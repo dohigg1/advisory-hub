@@ -7,7 +7,8 @@ export type ResultsSectionType =
   | "cta"
   | "next_steps"
   | "consultant_info"
-  | "progress_comparison";
+  | "progress_comparison"
+  | "ai_narrative";
 
 export interface ResultsPageSection {
   id: string;
@@ -27,6 +28,7 @@ export const RESULTS_SECTION_LABELS: Record<ResultsSectionType, string> = {
   next_steps: "Next Steps",
   consultant_info: "Consultant Info",
   progress_comparison: "Progress Comparison",
+  ai_narrative: "AI Narrative Summary",
 };
 
 export const RESULTS_SECTION_DESCRIPTIONS: Record<ResultsSectionType, string> = {
@@ -39,6 +41,7 @@ export const RESULTS_SECTION_DESCRIPTIONS: Record<ResultsSectionType, string> = 
   next_steps: "Recommended actions list, optionally dynamic by tier",
   consultant_info: "Consultant/firm contact card",
   progress_comparison: "Before/after comparison for retakes (iteration 2+)",
+  ai_narrative: "AI-generated personalised assessment summary with strengths, improvements, and recommendations",
 };
 
 export function createDefaultResultsSection(type: ResultsSectionType, sortOrder: number): ResultsPageSection {
@@ -97,6 +100,13 @@ export function createDefaultResultsSection(type: ResultsSectionType, sortOrder:
       show_radar: true,
       show_category_table: true,
       show_trend_line: true,
+    },
+    ai_narrative: {
+      heading: "Your Personalised Assessment Summary",
+      tone: "professional",
+      custom_context: "",
+      show_recommendations: true,
+      show_benchmark_context: true,
     },
   };
 

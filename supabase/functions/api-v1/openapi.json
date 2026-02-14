@@ -1,0 +1,849 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Advisory Hub API",
+    "description": "REST API for programmatic access to Advisory Hub assessments, leads, scores, benchmarks, and webhooks. Authenticate with a Bearer API key obtained from the Settings > API Keys page in the dashboard.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Advisory Hub Support"
+    }
+  },
+  "servers": [
+    {
+      "url": "/v1",
+      "description": "API v1"
+    }
+  ],
+  "security": [
+    {
+      "BearerApiKey": []
+    }
+  ],
+  "paths": {
+    "/assessments": {
+      "get": {
+        "operationId": "listAssessments",
+        "summary": "List assessments",
+        "description": "Returns a paginated list of assessments belonging to the organisation associated with the API key.",
+        "tags": ["Assessments"],
+        "security": [{ "BearerApiKey": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/Limit" },
+          { "$ref": "#/components/parameters/Offset" }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of assessments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/AssessmentSummary" }
+                    },
+                    "pagination": { "$ref": "#/components/schemas/Pagination" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      },
+      "post": {
+        "operationId": "createAssessment",
+        "summary": "Create an assessment",
+        "description": "Creates a new assessment in draft status for the organisation.",
+        "tags": ["Assessments"],
+        "security": [{ "BearerApiKey": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateAssessmentInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Assessment created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Assessment" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/assessments/{assessmentId}": {
+      "get": {
+        "operationId": "getAssessment",
+        "summary": "Get an assessment",
+        "description": "Returns a single assessment including its categories, questions, answer options, and score tiers.",
+        "tags": ["Assessments"],
+        "security": [{ "BearerApiKey": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/AssessmentId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Assessment with full details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/AssessmentFull" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/assessments/{assessmentId}/responses": {
+      "get": {
+        "operationId": "listAssessmentResponses",
+        "summary": "List responses for an assessment",
+        "description": "Returns a paginated list of all individual question responses submitted for an assessment across all leads.",
+        "tags": ["Responses"],
+        "security": [{ "BearerApiKey": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/AssessmentId" },
+          { "$ref": "#/components/parameters/Limit" },
+          { "$ref": "#/components/parameters/Offset" }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of responses",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Response" }
+                    },
+                    "pagination": { "$ref": "#/components/schemas/Pagination" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/assessments/{assessmentId}/scores": {
+      "get": {
+        "operationId": "listAssessmentScores",
+        "summary": "List scores for an assessment",
+        "description": "Returns a paginated list of calculated scores for all completed leads of an assessment.",
+        "tags": ["Scores"],
+        "security": [{ "BearerApiKey": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/AssessmentId" },
+          { "$ref": "#/components/parameters/Limit" },
+          { "$ref": "#/components/parameters/Offset" }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of scores",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Score" }
+                    },
+                    "pagination": { "$ref": "#/components/schemas/Pagination" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/assessments/{assessmentId}/benchmarks": {
+      "get": {
+        "operationId": "getAssessmentBenchmarks",
+        "summary": "Get benchmarks for an assessment",
+        "description": "Returns aggregate benchmark statistics (average, median, percentiles) for the assessment overall and per category.",
+        "tags": ["Scores"],
+        "security": [{ "BearerApiKey": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/AssessmentId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Benchmark data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Benchmarks" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/leads": {
+      "get": {
+        "operationId": "listLeads",
+        "summary": "List leads",
+        "description": "Returns a paginated list of leads for the organisation. Optionally filter by assessment_id.",
+        "tags": ["Leads"],
+        "security": [{ "BearerApiKey": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/Limit" },
+          { "$ref": "#/components/parameters/Offset" },
+          {
+            "name": "assessment_id",
+            "in": "query",
+            "description": "Filter leads to a specific assessment",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of leads",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Lead" }
+                    },
+                    "pagination": { "$ref": "#/components/schemas/Pagination" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      },
+      "post": {
+        "operationId": "createLead",
+        "summary": "Create a lead",
+        "description": "Creates a new lead record for a given assessment.",
+        "tags": ["Leads"],
+        "security": [{ "BearerApiKey": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateLeadInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Lead created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Lead" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/webhooks": {
+      "get": {
+        "operationId": "listWebhooks",
+        "summary": "List registered webhooks",
+        "description": "Returns all webhook URLs configured across the organisation's assessments.",
+        "tags": ["Webhooks"],
+        "security": [{ "BearerApiKey": [] }],
+        "responses": {
+          "200": {
+            "description": "List of configured webhooks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Webhook" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      },
+      "post": {
+        "operationId": "createWebhook",
+        "summary": "Register a webhook",
+        "description": "Registers a webhook URL on a specific assessment. When the assessment is completed by a lead, the webhook URL will receive a POST with the results payload.",
+        "tags": ["Webhooks"],
+        "security": [{ "BearerApiKey": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateWebhookInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Webhook registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Webhook" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerApiKey": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "API key issued from the Advisory Hub dashboard under Settings > API Keys. Pass in the Authorization header as `Bearer <key>`."
+      }
+    },
+    "parameters": {
+      "AssessmentId": {
+        "name": "assessmentId",
+        "in": "path",
+        "required": true,
+        "description": "UUID of the assessment",
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "Limit": {
+        "name": "limit",
+        "in": "query",
+        "description": "Maximum number of records to return (1-100, default 50)",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 50
+        }
+      },
+      "Offset": {
+        "name": "offset",
+        "in": "query",
+        "description": "Number of records to skip for pagination (default 0)",
+        "schema": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        }
+      }
+    },
+    "schemas": {
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": "Total number of records matching the query"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum records per page"
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Current offset"
+          }
+        }
+      },
+      "AssessmentSummary": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "title": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "type": {
+            "type": "string",
+            "enum": ["scorecard", "diagnostic", "readiness_check", "maturity_model"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["draft", "published", "archived"]
+          },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Assessment": {
+        "allOf": [
+          { "$ref": "#/components/schemas/AssessmentSummary" },
+          {
+            "type": "object",
+            "properties": {
+              "org_id": { "type": "string", "format": "uuid" },
+              "settings_json": { "type": "object" }
+            }
+          }
+        ]
+      },
+      "AssessmentFull": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Assessment" },
+          {
+            "type": "object",
+            "properties": {
+              "categories": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/CategoryFull" }
+              },
+              "score_tiers": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/ScoreTier" }
+              }
+            }
+          }
+        ]
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "assessment_id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "icon": { "type": "string" },
+          "colour": { "type": "string" },
+          "sort_order": { "type": "integer" },
+          "include_in_total": { "type": "boolean" }
+        }
+      },
+      "CategoryFull": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Category" },
+          {
+            "type": "object",
+            "properties": {
+              "questions": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/QuestionFull" }
+              }
+            }
+          }
+        ]
+      },
+      "Question": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "category_id": { "type": "string", "format": "uuid" },
+          "assessment_id": { "type": "string", "format": "uuid" },
+          "type": {
+            "type": "string",
+            "enum": ["yes_no", "multiple_choice", "sliding_scale", "rating_scale", "open_text", "checkbox_select", "image_select"]
+          },
+          "text": { "type": "string" },
+          "help_text": { "type": "string", "nullable": true },
+          "is_required": { "type": "boolean" },
+          "sort_order": { "type": "integer" },
+          "settings_json": { "type": "object" }
+        }
+      },
+      "QuestionFull": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Question" },
+          {
+            "type": "object",
+            "properties": {
+              "answer_options": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/AnswerOption" }
+              }
+            }
+          }
+        ]
+      },
+      "AnswerOption": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "question_id": { "type": "string", "format": "uuid" },
+          "text": { "type": "string" },
+          "points": { "type": "integer" },
+          "image_url": { "type": "string", "nullable": true },
+          "sort_order": { "type": "integer" }
+        }
+      },
+      "ScoreTier": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "assessment_id": { "type": "string", "format": "uuid" },
+          "label": { "type": "string" },
+          "min_pct": { "type": "integer" },
+          "max_pct": { "type": "integer" },
+          "colour": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "sort_order": { "type": "integer" }
+        }
+      },
+      "Response": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "lead_id": { "type": "string", "format": "uuid" },
+          "question_id": { "type": "string", "format": "uuid" },
+          "selected_option_ids": {
+            "type": "array",
+            "items": { "type": "string", "format": "uuid" }
+          },
+          "open_text_value": { "type": "string", "nullable": true },
+          "points_awarded": { "type": "integer" },
+          "responded_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Score": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "lead_id": { "type": "string", "format": "uuid" },
+          "assessment_id": { "type": "string", "format": "uuid" },
+          "total_points": { "type": "integer" },
+          "total_possible": { "type": "integer" },
+          "percentage": { "type": "number", "nullable": true },
+          "tier_id": { "type": "string", "format": "uuid", "nullable": true },
+          "category_scores_json": {
+            "type": "object",
+            "description": "Map of category_id to score breakdown: { points, possible, percentage, tier_id, tier_label, tier_colour }",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "points": { "type": "integer" },
+                "possible": { "type": "integer" },
+                "percentage": { "type": "number", "nullable": true },
+                "tier_id": { "type": "string", "nullable": true },
+                "tier_label": { "type": "string", "nullable": true },
+                "tier_colour": { "type": "string", "nullable": true }
+              }
+            }
+          },
+          "calculated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Benchmark": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "assessment_id": { "type": "string", "format": "uuid" },
+          "category_id": { "type": "string", "format": "uuid", "nullable": true },
+          "avg_score": { "type": "number" },
+          "median_score": { "type": "number" },
+          "percentile_25": { "type": "number" },
+          "percentile_75": { "type": "number" },
+          "sample_size": { "type": "integer" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Benchmarks": {
+        "type": "object",
+        "properties": {
+          "overall": {
+            "nullable": true,
+            "allOf": [{ "$ref": "#/components/schemas/Benchmark" }],
+            "description": "Aggregate benchmark across all categories (category_id is null)"
+          },
+          "categories": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Benchmark" },
+            "description": "Per-category benchmark data"
+          }
+        }
+      },
+      "Lead": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "assessment_id": { "type": "string", "format": "uuid" },
+          "org_id": { "type": "string", "format": "uuid" },
+          "email": { "type": "string", "format": "email" },
+          "first_name": { "type": "string", "nullable": true },
+          "last_name": { "type": "string", "nullable": true },
+          "company": { "type": "string", "nullable": true },
+          "phone": { "type": "string", "nullable": true },
+          "custom_fields_json": { "type": "object" },
+          "source": { "type": "string" },
+          "utm_json": { "type": "object" },
+          "status": {
+            "type": "string",
+            "enum": ["started", "completed"]
+          },
+          "started_at": { "type": "string", "format": "date-time" },
+          "completed_at": { "type": "string", "format": "date-time", "nullable": true },
+          "score_id": { "type": "string", "format": "uuid", "nullable": true },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CreateAssessmentInput": {
+        "type": "object",
+        "required": ["title"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Assessment title"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["scorecard", "diagnostic", "readiness_check", "maturity_model"],
+            "default": "scorecard"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["draft", "published"],
+            "default": "draft"
+          },
+          "settings_json": {
+            "type": "object",
+            "description": "Optional settings object"
+          }
+        }
+      },
+      "CreateLeadInput": {
+        "type": "object",
+        "required": ["email", "assessment_id"],
+        "properties": {
+          "assessment_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "UUID of the assessment this lead is for"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Lead email address"
+          },
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" },
+          "company": { "type": "string" },
+          "phone": { "type": "string" },
+          "custom_fields_json": { "type": "object" },
+          "source": {
+            "type": "string",
+            "default": "api"
+          },
+          "utm_json": { "type": "object" }
+        }
+      },
+      "Webhook": {
+        "type": "object",
+        "properties": {
+          "assessment_id": { "type": "string", "format": "uuid" },
+          "assessment_title": {
+            "type": "string",
+            "description": "Title of the assessment (only present on list endpoint)"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Webhook delivery URL"
+          },
+          "events": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Event types that trigger the webhook",
+            "example": ["assessment.completed"]
+          }
+        }
+      },
+      "CreateWebhookInput": {
+        "type": "object",
+        "required": ["assessment_id", "url"],
+        "properties": {
+          "assessment_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Assessment to attach the webhook to"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL that will receive webhook POST requests"
+          },
+          "secret": {
+            "type": "string",
+            "description": "Optional HMAC secret for signing webhook payloads"
+          },
+          "events": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Event types to subscribe to (default: [\"assessment.completed\"])"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Human-readable error message"
+          }
+        }
+      },
+      "RateLimitError": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" },
+          "limit": { "type": "integer", "description": "Requests allowed per hour" },
+          "retry_after_seconds": { "type": "integer" }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Invalid request body or parameters",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Missing or invalid API key",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" },
+            "example": { "error": "Missing or invalid Authorization header" }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "API key does not have the required scope",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" },
+            "example": { "error": "Insufficient scope. Required: assessments:read" }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" },
+            "example": { "error": "Assessment not found" }
+          }
+        }
+      },
+      "RateLimited": {
+        "description": "Rate limit exceeded",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/RateLimitError" },
+            "example": {
+              "error": "Rate limit exceeded",
+              "limit": 1000,
+              "retry_after_seconds": 60
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Assessments",
+      "description": "Create and retrieve assessments with their full structure (categories, questions, answer options, and score tiers)."
+    },
+    {
+      "name": "Responses",
+      "description": "Read individual question responses submitted by leads."
+    },
+    {
+      "name": "Scores",
+      "description": "Read calculated scores and aggregate benchmark statistics."
+    },
+    {
+      "name": "Leads",
+      "description": "Manage lead records (assessment takers)."
+    },
+    {
+      "name": "Webhooks",
+      "description": "Register and list webhook URLs that receive event payloads when assessments are completed."
+    }
+  ]
+}

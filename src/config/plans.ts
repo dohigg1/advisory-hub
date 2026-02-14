@@ -21,6 +21,8 @@ export interface PlanConfig {
     remove_branding: boolean;
     ab_testing: boolean;
     data_enrichment: boolean;
+    ai_generations_per_month: number; // -1 = unlimited
+    ai_narratives: boolean;
   };
 }
 
@@ -45,6 +47,8 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
       remove_branding: false,
       ab_testing: false,
       data_enrichment: false,
+      ai_generations_per_month: 1,
+      ai_narratives: false,
     },
   },
   starter: {
@@ -67,6 +71,8 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
       remove_branding: false,
       ab_testing: false,
       data_enrichment: false,
+      ai_generations_per_month: 5,
+      ai_narratives: false,
     },
   },
   professional: {
@@ -89,6 +95,8 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
       remove_branding: true,
       ab_testing: false,
       data_enrichment: false,
+      ai_generations_per_month: 20,
+      ai_narratives: true,
     },
   },
   firm: {
@@ -111,6 +119,8 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
       remove_branding: true,
       ab_testing: true,
       data_enrichment: true,
+      ai_generations_per_month: -1,
+      ai_narratives: true,
     },
   },
 };
@@ -129,4 +139,6 @@ export const FEATURE_LABELS: Record<string, string> = {
   remove_branding: "Remove branding",
   ab_testing: "A/B testing",
   data_enrichment: "Data enrichment",
+  ai_generations_per_month: "AI generations / month",
+  ai_narratives: "AI narrative summaries",
 };

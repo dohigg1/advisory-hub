@@ -1,26 +1,51 @@
 import { Page, View, Text, StyleSheet } from "@react-pdf/renderer";
 import type { ResultsData, CategoryScore } from "@/pages/PublicResults";
+import type { ReportTheme } from "./themes";
 import { PdfDonutChart } from "./charts/PdfDonutChart";
-import { pageStyles } from "./shared-styles";
+import { createPageStyles } from "./shared-styles";
 
-const styles = StyleSheet.create({
-  ...pageStyles,
-  header: { flexDirection: "row", alignItems: "center", gap: 20, marginBottom: 20 },
-  catName: { fontSize: 18, fontWeight: 700, color: "#1E293B" },
-  tierBadge: { fontSize: 9, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10, marginTop: 4 },
-  content: { fontSize: 10, color: "#475569", lineHeight: 1.6, marginBottom: 10 },
-  barContainer: { marginTop: 12 },
-  barLabel: { fontSize: 8, color: "#94A3B8", marginBottom: 4 },
-  barBg: { height: 12, borderRadius: 6, backgroundColor: "#F1F5F9", width: "100%", position: "relative" },
-  barFill: { height: 12, borderRadius: 6, position: "absolute", top: 0, left: 0 },
-  benchmarkLine: { position: "absolute", top: -2, width: 2, height: 16, backgroundColor: "#64748B" },
-  benchmarkRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 6 },
-  benchmarkText: { fontSize: 8, color: "#94A3B8" },
-});
+interface Props {
+  cs: CategoryScore;
+  data: ResultsData;
+  theme: ReportTheme;
+}
 
-interface Props { cs: CategoryScore; data: ResultsData }
+export function CategoryPage({ cs, data, theme }: Props) {
+  const t = theme;
+  const ps = createPageStyles(t);
 
-export function CategoryPage({ cs, data }: Props) {
+  const styles = StyleSheet.create({
+    ...ps,
+    header: { flexDirection: "row", alignItems: "center", gap: 20, marginBottom: 20 },
+    catName: {
+      fontSize: t.typography.headingSizes.h2,
+      fontWeight: 700,
+      fontFamily: t.typography.headingFont,
+      color: t.typography.headingColor,
+    },
+    tierBadge: { fontSize: 9, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10, marginTop: 4 },
+    content: { fontSize: 10, color: t.typography.bodyColor, lineHeight: 1.6, marginBottom: 10 },
+    barContainer: { marginTop: 12 },
+    barLabel: { fontSize: 8, color: t.typography.mutedColor, marginBottom: 4 },
+    barBg: {
+      height: 12,
+      borderRadius: t.charts.barRadius,
+      backgroundColor: t.charts.gridColor,
+      width: "100%",
+      position: "relative",
+    },
+    barFill: {
+      height: 12,
+      borderRadius: t.charts.barRadius,
+      position: "absolute",
+      top: 0,
+      left: 0,
+    },
+    benchmarkLine: { position: "absolute", top: -2, width: 2, height: 16, backgroundColor: t.typography.bodyColor },
+    benchmarkRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 6 },
+    benchmarkText: { fontSize: 8, color: t.typography.mutedColor },
+  });
+
   const tierColour = cs.tier?.colour || data.brandColour;
   const benchmark = data.benchmarks?.categories?.[cs.category.id];
 
@@ -30,7 +55,7 @@ export function CategoryPage({ cs, data }: Props) {
         <PdfDonutChart
           percentage={cs.percentage}
           size={90}
-          strokeWidth={10}
+          strokeWidth={t.charts.donutStrokeWidth - 6}
           colour={tierColour}
           showLabel={false}
         />

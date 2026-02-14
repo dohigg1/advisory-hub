@@ -1,20 +1,39 @@
 import { Page, View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import type { ResultsData } from "@/pages/PublicResults";
-import { pageStyles } from "./shared-styles";
+import type { ReportTheme } from "./themes";
+import { createPageStyles } from "./shared-styles";
 
-const styles = StyleSheet.create({
-  ...pageStyles,
-  heading: { fontSize: 20, fontWeight: 700, color: "#1E293B", marginBottom: 20 },
-  card: { backgroundColor: "#F8FAFC", borderRadius: 8, padding: 24, alignItems: "center" },
-  orgLogo: { width: 80, marginBottom: 16 },
-  orgName: { fontSize: 16, fontWeight: 600, color: "#1E293B", marginBottom: 8 },
-  contactText: { fontSize: 10, color: "#64748B", marginBottom: 4, textAlign: "center" },
-  cta: { marginTop: 20, fontSize: 11, fontWeight: 600, textAlign: "center" },
-});
+interface Props {
+  data: ResultsData;
+  theme: ReportTheme;
+}
 
-interface Props { data: ResultsData }
+export function AboutPage({ data, theme }: Props) {
+  const t = theme;
+  const ps = createPageStyles(t);
 
-export function AboutPage({ data }: Props) {
+  const styles = StyleSheet.create({
+    ...ps,
+    heading: {
+      fontSize: t.typography.headingSizes.h1,
+      fontWeight: 700,
+      fontFamily: t.typography.headingFont,
+      color: t.typography.headingColor,
+      marginBottom: 20,
+    },
+    card: {
+      backgroundColor: t.sections.backgroundColor,
+      borderRadius: t.sections.borderRadius,
+      padding: 24,
+      alignItems: "center",
+      ...(t.sections.backgroundColor === "#FFFFFF" ? { borderWidth: 1, borderColor: t.sections.borderColor } : {}),
+    },
+    orgLogo: { width: 80, marginBottom: 16 },
+    orgName: { fontSize: 16, fontWeight: 600, color: t.typography.headingColor, marginBottom: 8 },
+    contactText: { fontSize: 10, color: t.typography.bodyColor, marginBottom: 4, textAlign: "center" },
+    cta: { marginTop: 20, fontSize: 11, fontWeight: 600, textAlign: "center" },
+  });
+
   return (
     <Page size="A4" style={styles.page}>
       <Text style={styles.heading}>About</Text>

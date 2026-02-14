@@ -1,27 +1,51 @@
 import { Page, View, Text, StyleSheet } from "@react-pdf/renderer";
 import type { ResultsData } from "@/pages/PublicResults";
+import type { ReportTheme } from "./themes";
 import { PdfRadarChart } from "./charts/PdfRadarChart";
-import { pageStyles } from "./shared-styles";
+import { createPageStyles } from "./shared-styles";
 
-const styles = StyleSheet.create({
-  ...pageStyles,
-  heading: { fontSize: 20, fontWeight: 700, color: "#1E293B", marginBottom: 16 },
-  chartContainer: { alignItems: "center", marginBottom: 20 },
-  table: { width: "100%" },
-  tableHeader: { flexDirection: "row", borderBottomWidth: 1, borderBottomColor: "#E2E8F0", paddingBottom: 6, marginBottom: 6 },
-  tableRow: { flexDirection: "row", paddingVertical: 5, borderBottomWidth: 0.5, borderBottomColor: "#F1F5F9" },
-  colName: { flex: 3, fontSize: 10, color: "#334155" },
-  colScore: { flex: 1, fontSize: 10, color: "#334155", textAlign: "center" },
-  colBenchmark: { flex: 1, fontSize: 10, color: "#94A3B8", textAlign: "center" },
-  colTier: { flex: 1.5, fontSize: 10, textAlign: "center" },
-  headerText: { fontSize: 8, color: "#94A3B8", textTransform: "uppercase", fontWeight: 600 },
-  dot: { width: 8, height: 8, borderRadius: 4, marginRight: 4 },
-  tierRow: { flexDirection: "row", alignItems: "center", justifyContent: "center" },
-});
+interface Props {
+  data: ResultsData;
+  theme: ReportTheme;
+}
 
-interface Props { data: ResultsData }
+export function CategoryOverview({ data, theme }: Props) {
+  const t = theme;
+  const ps = createPageStyles(t);
 
-export function CategoryOverview({ data }: Props) {
+  const styles = StyleSheet.create({
+    ...ps,
+    heading: {
+      fontSize: t.typography.headingSizes.h1,
+      fontWeight: 700,
+      fontFamily: t.typography.headingFont,
+      color: t.typography.headingColor,
+      marginBottom: 16,
+    },
+    chartContainer: { alignItems: "center", marginBottom: 20 },
+    table: { width: "100%" },
+    tableHeader: {
+      flexDirection: "row",
+      borderBottomWidth: 1,
+      borderBottomColor: t.sections.borderColor,
+      paddingBottom: 6,
+      marginBottom: 6,
+    },
+    tableRow: {
+      flexDirection: "row",
+      paddingVertical: 5,
+      borderBottomWidth: 0.5,
+      borderBottomColor: t.charts.gridColor,
+    },
+    colName: { flex: 3, fontSize: 10, color: t.typography.bodyColor },
+    colScore: { flex: 1, fontSize: 10, color: t.typography.bodyColor, textAlign: "center" },
+    colBenchmark: { flex: 1, fontSize: 10, color: t.typography.mutedColor, textAlign: "center" },
+    colTier: { flex: 1.5, fontSize: 10, textAlign: "center" },
+    headerText: { fontSize: 8, color: t.typography.mutedColor, textTransform: "uppercase", fontWeight: 600 },
+    dot: { width: 8, height: 8, borderRadius: 4, marginRight: 4 },
+    tierRow: { flexDirection: "row", alignItems: "center", justifyContent: "center" },
+  });
+
   const radarItems = data.categoryScores.map(cs => ({
     label: cs.category.name,
     value: cs.percentage,
@@ -59,7 +83,7 @@ export function CategoryOverview({ data }: Props) {
                 {cs.tier && (
                   <View style={[styles.dot, { backgroundColor: cs.tier.colour }]} />
                 )}
-                <Text style={{ fontSize: 10, color: cs.tier?.colour || "#64748B" }}>
+                <Text style={{ fontSize: 10, color: cs.tier?.colour || t.typography.bodyColor }}>
                   {cs.tier?.label || "—"}
                 </Text>
               </View>
